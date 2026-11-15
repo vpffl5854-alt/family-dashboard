@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<title>우리 가족 기록장</title>
+<style>
+  :root {
+    --bg: #FFF9E6;
+    --bg-grad: linear-gradient(180deg, #FFFBEF 0%, #FFF5D6 100%);
+    --card: #FFFFFF;
+    --card-soft: #FFFCF2;
+    --border: #EFE5C5;
+    --text: #3A3228;
+    --muted: #8A7E6B;
+    --accent: #F4A261;
+    --accent-soft: #FFF0D9;
+    --mint: #E8F7EE;
+    --mint-border: #C7EAD5;
+    --green: #38A169;
+    --blue: #EBF5FF;
+    --blue-border: #C6E0FA;
+    --blue-text: #2B6CB0;
+    --pink: #FFF0F5;
+    --pink-border: #FAD2E1;
+    --danger: #E53E3E;
+    --shadow: 0 6px 20px rgba(130, 105, 55, 0.08);
+    --radius: 22px;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+    background: var(--bg-grad);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 90px;
+  }
+
+  .app {
+    max-width: 460px;
+    margin: 0 auto;
+    padding: 14px 14px 36px;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    background: #FFF;
+    border: 1.5px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.04);
+  }
+  .header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
+  .header h1 span { color: #D97757; }
+  .date-sub {
+    margin-top: 3px;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+  .header-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+  .icon-row {
+    display: flex;
+    gap: 6px;
+  }
+  .pill-btn {
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .pill-btn:active { transform: scale(0.97); }
+  .dot-online {
+    width: 7px; height: 7px; border-radius: 50%; background: #38A169; display: inline-block;
+  }
+
+  /* Nav Tabs */
+  .nav-tabs {
+    position: sticky;
+    top: 8px;
+    z-index: 30;
+    display: flex;
+    gap: 6px;
+    background: rgba(255, 251, 239, 0.92);
+    backdrop-filter: blur(10px);
+    padding: 6px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    margin-bottom: 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex: 1 0 auto;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .nav-tab.active {
+    background: var(--text);
+    color: #FFFDF7;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 15px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-mint {
+    background: linear-gradient(135deg, #E8F7EE 0%, #EEF9F2 100%);
+    border-color: var(--mint-border);
+  }
+  .card-soft-pink {
+    background: linear-gradient(135deg, #FFF7FA 0%, #FFFDF7 100%);
+    border-color: var(--pink-border);
+  }
+  .card-soft-blue {
+    background: linear-gradient(135deg, #F2F8FF 0%, #FFFFFF 100%);
+    border-color: var(--blue-border);
+  }
+  .card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+  .card-desc {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 0 0 12px;
+    line-height: 1.45;
+  }
+  .badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: #B45309;
+    border: 1px solid #F6D8AE;
+    white-space: nowrap;
+  }
+  .badge-green { background: #E6F7ED; color: #276749; border-color: #B8E6C8; }
+  .badge-blue { background: #EBF5FF; color: #2B6CB0; border-color: #C6E0FA; }
+  .badge-gray { background: #F5F2EA; color: #6B6257; border-color: #E5DEC9; }
+
+  /* Weather */
+  .weather-card {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .weather-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .weather-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 800;
+  }
+  .weather-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .weather-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Family Member Rows */
+  .member-row {
+    background: rgba(255,255,255,0.92);
+    border: 1.5px solid #D9EFE1;
+    border-radius: 18px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 9px;
+  }
+  .member-row:last-child { margin-bottom: 0; }
+  .member-left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .avatar-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    background: #FFF9E6;
+    border: 1.5px solid var(--border);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .member-name { font-size: 15.5px; font-weight: 800; }
+  .member-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .member-stats { text-align: right; cursor: pointer; }
+  .star-score { font-size: 16px; font-weight: 800; }
+  .piggy-link {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #C05621;
+    margin-top: 2px;
+  }
+
+  /* Stamp Board */
+  .week-stamps {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin: 12px 0;
+  }
+  .stamp-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+  .stamp-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+  }
+  .stamp-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1.5px dashed #DFD4B4;
+    background: #FFFDF7;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    transition: transform 0.2s;
+  }
+  .stamp-circle.today { border-color: #63B3ED; border-style: solid; background: #F0F8FF; }
+  .stamp-circle.stamped {
+    border-style: solid;
+    border-color: #F6AD55;
+    background: #FFF6DC;
+    transform: scale(1.05);
+  }
+  .stamp-footer {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Buttons */
+  .btn {
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    color: var(--text);
+    border-radius: 14px;
+    padding: 10px 13px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.12s;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-sm { padding: 7px 10px; font-size: 12px; border-radius: 11px; }
+  .btn-green { background: #E3F6EA; border-color: #B4E4C6; color: #22543D; }
+  .btn-blue { background: #EBF5FF; border-color: #BDDDFC; color: #2A4365; }
+  .btn-amber { background: #FFF3D6; border-color: #F6D88C; color: #975A16; }
+  .btn-danger { background: #FFF5F5; border-color: #FED7D7; color: #C53030; }
+  .btn-full { width: 100%; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row > * { flex: 1; }
+
+  /* Mission */
+  .mission-box {
+    text-align: center;
+    padding: 10px 6px 14px;
+  }
+  .mission-emoji { font-size: 40px; margin-bottom: 6px; display: block; }
+  .mission-text { font-size: 17px; font-weight: 800; line-height: 1.4; }
+  .mission-done-tag {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+  }
+
+  /* Todos & Study Items */
+  .item-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 11px;
+    border-radius: 15px;
+    background: #FFFDF8;
+    border: 1.5px solid #EFE7CF;
+    position: relative;
+  }
+  .task-item.done { background: #F7FAF8; border-color: #DCECE1; }
+  .task-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+  }
+  .chk {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 2px solid #CBBFA0;
+    background: #FFF;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 900;
+    color: #FFF;
+  }
+  .task-item.done .chk {
+    background: #38A169;
+    border-color: #38A169;
+  }
+  .task-item.study.done .chk {
+    background: #3182CE;
+    border-color: #3182CE;
+  }
+  .task-title {
+    font-size: 14px;
+    font-weight: 700;
+    word-break: break-word;
+  }
+  .task-item.done .task-title {
+    text-decoration: line-through;
+    color: var(--muted);
+  }
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 3px;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 8px;
+    background: #F4EFE0;
+    color: #6B6257;
+  }
+  .chip-coin {
+    background: #FEF3C7;
+    color: #92400E;
+    border: 1px solid #FDE68A;
+  }
+  .task-btns {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .mini-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #FFF;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+  }
+  .mini-icon-btn.pinned { background: #FEF3C7; border-color: #F6D88C; }
+
+  .highfive-banner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #FFF3C4, #FFE4E6);
+    border: 1.5px solid #F6AD55;
+    border-radius: 14px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #9C4221;
+    margin-bottom: 10px;
+    animation: popIn 0.35s ease;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0 12px;
+  }
+  .progress-track {
+    flex: 1;
+    height: 10px;
+    background: #EFE7CF;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #63B3ED, #48BB78);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  .progress-label { font-size: 12.5px; font-weight: 800; color: var(--text); white-space: nowrap; }
+
+  /* Timer */
+  .timer-box {
+    background: #FFFDF8;
+    border: 1.5px dashed #D7CBB0;
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .seg-tabs {
+    display: inline-flex;
+    background: #F4EFE0;
+    padding: 4px;
+    border-radius: 999px;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .seg-btn {
+    border: none;
+    background: transparent;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .seg-btn.active {
+    background: #FFF;
+    color: var(--blue-text);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .timer-display {
+    font-size: 46px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    color: #2C3E50;
+    margin: 6px 0 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    margin: 10px 0 8px;
+    flex-wrap: wrap;
+  }
+  .alarm-box {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Chat */
+  .chat-profiles {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .profile-chip {
+    flex: 1;
+    min-width: 90px;
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    border-radius: 14px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .profile-chip.active {
+    background: #EBF5FF;
+    border-color: #63B3ED;
+    color: #2B6CB0;
+  }
+  .chat-feed {
+    background: #FFFDF7;
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 12px;
+    min-height: 210px;
+    max-height: 330px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+  .msg-row.mine { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 12px; background: #FFF; border: 1px solid var(--border);
+    display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+  }
+  .msg-col { max-width: 75%; display: flex; flex-direction: column; gap: 3px; }
+  .msg-row.mine .msg-col { align-items: flex-end; }
+  .msg-sender { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .msg-bubble {
+    background: #FFF;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .msg-row.mine .msg-bubble {
+    background: #E2F0FF;
+    border-color: #BFDDFC;
+  }
+  .msg-sticker {
+    font-size: 46px;
+    line-height: 1.1;
+    padding: 4px 8px;
+  }
+  .msg-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .heart-btn {
+    border: 1px solid var(--border);
+    background: #FFF;
+    border-radius: 999px;
+    padding: 2px 7px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .sticker-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 4px 0 8px;
+  }
+  .sticker-pick {
+    border: 1px solid var(--border);
+    background: #FFF;
+    border-radius: 12px;
+    padding: 5px 9px;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .chat-composer {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* Inputs */
+  input[type="text"], input[type="number"], input[type="time"], select {
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    border-radius: 12px;
+    padding: 9px 11px;
+    font-size: 13.5px;
+    color: var(--text);
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+  }
+  input:focus { border-color: #F4A261; }
+
+  /* Ledger */
+  .ledger-hero {
+    background: linear-gradient(135deg, #FFF7E0 0%, #FFF0F5 100%);
+    border: 1.5px solid #F6D8AE;
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .ledger-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .ledger-big { font-size: 28px; font-weight: 900; color: #9C4221; }
+  .pill-list { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
+  /* Floating Coin */
+  .coin-toast {
+    position: fixed;
+    left: 50%;
+    top: 42%;
+    transform: translate(-50%, -50%);
+    z-index: 999;
+    background: #FFFBEB;
+    border: 2px solid #F59E0B;
+    color: #92400E;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 900;
+    box-shadow: 0 10px 30px rgba(245, 158, 11, 0.28);
+    pointer-events: none;
+    animation: coinRise 1.25s ease forwards;
+  }
+  @keyframes coinRise {
+    0% { opacity: 0; transform: translate(-50%, 10px) scale(0.8); }
+    20% { opacity: 1; transform: translate(-50%, -8px) scale(1.08); }
+    80% { opacity: 1; transform: translate(-50%, -32px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -52px) scale(0.95); }
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.92); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(35, 28, 18, 0.48);
+    display: none;
+    place-items: center;
+    z-index: 100;
+    padding: 16px;
+  }
+  .modal-backdrop.open { display: grid; }
+  .modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: #FFFDF8;
+    border: 2px solid var(--border);
+    border-radius: 24px;
+    padding: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .cal-cell {
+    aspect-ratio: 1;
+    border-radius: 12px;
+    border: 1px solid #EFE7CF;
+    background: #FFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .cal-cell.stamped { background: #FFF3C4; border-color: #F6AD55; }
+  .hidden { display: none !important; }
+  audio { max-width: 185px; height: 32px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <div class="title-wrap">
+        <div class="logo-badge" id="appLogo">🐾</div>
+        <h1 id="appTitle">우리 가족 <span>기록장</span></h1>
+      </div>
+      <div class="date-sub" id="todayText"></div>
+    </div>
+    <div class="header-actions">
+      <div class="icon-row">
+        <button class="pill-btn" onclick="openSettings()"><span class="dot-online"></span> ⚙️ 설정</button>
+        <button class="pill-btn" onclick="exportBackup()">↗</button>
+      </div>
+      <div class="pill-btn" style="font-size:11px; padding:4px 10px;">✨ 오늘도 함께 기록해요</div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs" id="navTabs">
+    <button class="nav-tab active" data-tab="all" onclick="switchTab('all')">전체</button>
+    <button class="nav-tab" data-tab="home" onclick="switchTab('home')">🏠 홈</button>
+    <button class="nav-tab" data-tab="study" onclick="switchTab('study')">📚 공부·타이머</button>
+    <button class="nav-tab" data-tab="chat" onclick="switchTab('chat')">💬 가족채팅</button>
+    <button class="nav-tab" data-tab="ledger" onclick="switchTab('ledger')">🐷 용돈기입장</button>
+  </nav>
+
+  <!-- HOME SECTION -->
+  <section data-section="home">
+    <!-- Weather -->
+    <div class="card weather-card">
+      <div class="weather-top">
+        <div class="weather-main">
+          <span id="weatherIcon">☀️</span>
+          <span id="weatherMainText">대구 침산동 · 불러오는 중...</span>
+        </div>
+        <span class="badge badge-gray" id="pm10Badge">미세먼지 확인중</span>
+      </div>
+      <div class="weather-bottom">
+        <span class="badge" id="pm25Badge">초미세먼지 확인중</span>
+        <span class="weather-sub" id="weatherTip">좋은 하루 보내세요</span>
+      </div>
+    </div>
+
+    <!-- Family Members Summary -->
+    <div class="card card-mint" id="memberSummaryCard"></div>
+
+    <!-- Stamp Board -->
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">🐹 오늘의 도장판</h2>
+        <span class="badge" id="streakBadge">🔥 0일 연속</span>
+      </div>
+      <p class="card-desc">공부나 루틴을 하나라도 마치면 도장이 자동으로 찍혀요</p>
+      <div class="week-stamps" id="weekStamps"></div>
+      <div class="stamp-footer">
+        <span class="badge badge-gray" id="monthStampBadge">이번 달 도장 0개</span>
+        <button class="btn btn-sm" style="flex:1" onclick="openStampCalendar()">📅 도장판 달력 보기</button>
+      </div>
+    </div>
+
+    <!-- Random Family Mission -->
+    <div class="card card-soft-pink">
+      <div class="card-head">
+        <h2 class="card-title">🎲 오늘의 가족 미션</h2>
+        <span class="badge badge-gray" id="missionCountBadge">함께 0번</span>
+      </div>
+      <div class="mission-box">
+        <span class="mission-emoji" id="missionEmoji">🥕</span>
+        <div class="mission-text" id="missionText">저녁 준비 같이 돕기</div>
+        <div class="mission-done-tag hidden" id="missionDoneTag">✨ 오늘 미션 완료!</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="completeMission()">✅ 다 같이 했어요</button>
+        <button class="btn" onclick="nextMission()">🔄 다른 미션 뽑기</button>
+      </div>
+      <p class="card-desc" style="margin:10px 0 0; text-align:center;">함께 가볍게 해보는 미션이에요. 설정에서 목록을 바꿀 수 있어요.</p>
+    </div>
+
+    <!-- Member Todo Lists -->
+    <div id="todoCardsWrap"></div>
+  </section>
+
+  <!-- STUDY & TIMER SECTION -->
+  <section data-section="study">
+    <div class="card card-soft-blue">
+      <div class="card-head">
+        <h2 class="card-title">📚 오늘의 공부 플랜</h2>
+        <span class="badge badge-blue" id="studyEarnBadge">오늘 +0원</span>
+      </div>
+      <p class="card-desc">항목마다 정한 금액이 체크할 때마다 적립되고, 핀(📌) 고정 항목은 매일 자동으로 올라와요.</p>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn btn-sm" onclick="resetDailyFixedStudies()">⚙️ 고정 항목 리셋</button>
+        <button class="btn btn-sm btn-blue" onclick="openAddStudyModal()">+ 공부 추가</button>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="studyProgressBar" style="width:0%"></div></div>
+        <div class="progress-label" id="studyProgressText">0 / 0 완료</div>
+      </div>
+
+      <!-- Timer + Tablet Off Alarm -->
+      <div class="timer-box">
+        <div class="seg-tabs">
+          <button class="seg-btn active" id="modeCountdownBtn" onclick="setTimerMode('countdown')">⏳ 남은 시간</button>
+          <button class="seg-btn" id="modeStopwatchBtn" onclick="setTimerMode('stopwatch')">⏱️ 재는 시간</button>
+        </div>
+        <div class="date-sub" id="timerHint">10분 · 시작을 눌러요</div>
+        <div class="timer-display" id="timerDisplay">10:00</div>
+        <div class="btn-row">
+          <button class="btn btn-green" id="timerStartBtn" onclick="toggleTimer()">▶ 시작</button>
+          <button class="btn" onclick="resetTimer()">↺ 초기화</button>
+        </div>
+        <div class="preset-row">
+          <button class="btn btn-sm" onclick="setPresetMinutes(10)">10분</button>
+          <button class="btn btn-sm" onclick="setPresetMinutes(20)">20분</button>
+          <button class="btn btn-sm" onclick="setPresetMinutes(30)">30분</button>
+          <input type="number" id="customMinutesInput" min="1" max="180" placeholder="직접(분)" style="width:92px; padding:6px 8px;" />
+          <button class="btn btn-sm" onclick="applyCustomMinutes()">분 맞추기</button>
+        </div>
+        <div class="alarm-box">
+          <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:800; cursor:pointer;">
+            <input type="checkbox" id="tabletAlarmOn" onchange="saveTabletAlarm()" />
+            📵 태블릿 끄기 알람
+          </label>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="time" id="tabletAlarmTime" value="21:30" onchange="saveTabletAlarm()" style="width:118px; padding:5px 8px; font-size:12.5px;" />
+            <button class="btn btn-sm btn-amber" onclick="triggerAlarmNotice('⏰ 테스트 알람! 약속한 태블릿 종료 시간이에요.')">테스트</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Study Items -->
+      <div class="item-list" id="studyList"></div>
+    </div>
+  </section>
+
+  <!-- CHAT SECTION -->
+  <section data-section="chat">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">💬 우리 가족 채팅</h2>
+        <button class="pill-btn" id="chatSoundBtn" onclick="toggleChatSound()">🔔 알림음 켜짐</button>
+      </div>
+      <p class="card-desc">말풍선, 스티커, 음성 메시지로 가볍게 소통해요. (현재 기기 저장 모드 · 웹 공유는 서버 연결 시 실시간 동기화)</p>
+      <div class="chat-profiles" id="chatProfileBar"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+        <span class="date-sub" style="margin:0;" id="chatLockStatus">프로필 전환 가능</span>
+        <button class="btn btn-sm" id="deviceLockBtn" onclick="toggleDeviceLock()">🔓 이 기기 잠금</button>
+      </div>
+
+      <div class="chat-feed" id="chatFeed"></div>
+
+      <div class="sticker-bar" id="stickerBar"></div>
+
+      <div class="chat-composer">
+        <input type="text" id="chatInput" placeholder="메시지 입력..." onkeydown="if(event.key==='Enter') sendChatText()" />
+        <button class="btn btn-sm btn-amber" id="voiceRecBtn" onclick="toggleVoiceRecord()">🎙️</button>
+        <button class="btn btn-sm btn-blue" onclick="sendChatText()">전송</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALLOWANCE LEDGER SECTION -->
+  <section data-section="ledger">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">🐷 용돈기입장</h2>
+        <span class="badge" id="ledgerMemberBadge">대표</span>
+      </div>
+      <p class="card-desc">공부를 끝낼 때마다 정한 금액이 자동으로 쌓이고, 입금·사용 내역도 함께 기록해요.</p>
+
+      <div class="ledger-hero">
+        <div class="ledger-total-row">
+          <span style="font-size:13px; font-weight:800;">지금 모은 돈</span>
+          <span class="ledger-big" id="ledgerTotalAmount">0원</span>
+        </div>
+        <div class="pill-list" id="ledgerSummaryPills"></div>
+        <label style="display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:5px;">시작 금액 (이미 모아 둔 돈)</label>
+        <div style="display:flex; gap:6px;">
+          <input type="number" id="startMoneyInput" placeholder="0" />
+          <button class="btn btn-sm btn-amber" onclick="saveStartMoney()">적용</button>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:8px;">
+        <input type="number" id="txAmountInput" placeholder="금액(원)" />
+        <input type="text" id="txMemoInput" placeholder="내용 (예: 간식, 용돈)" />
+      </div>
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn btn-sm btn-green" onclick="addLedgerTx('income')">+ 입금</button>
+        <button class="btn btn-sm btn-danger" onclick="addLedgerTx('expense')">- 사용</button>
+      </div>
+
+      <h3 style="font-size:14px; font-weight:800; margin:0 0 8px;">📅 매일 공부 적립 & 내역</h3>
+      <div class="item-list" id="ledgerHistoryList"></div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this) closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'family_dashboard_v1';
+
+function todayKey(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+const DEFAULT_STATE = {
+  appName: '우리 가족 기록장',
+  appLogo: '🐾',
+  city: { name: '대구 침산동', lat: 35.8866, lon: 128.5902 },
+  members: [
+    { id: 'm1', name: '초파', role: '오늘의 주인공', avatar: '🐹', mascot: '함께 기록 중' },
+    { id: 'm2', name: '엄마', role: '함께 응원해요', avatar: '🐰', mascot: '따뜻한 서포터' },
+    { id: 'm3', name: '아빠', role: '함께 응원해요', avatar: '🐻', mascot: '든든한 서포터' }
+  ],
+  todos: {
+    m1: [
+      { id: 't1', title: '책 30분 읽기', done: false },
+      { id: 't2', title: '내일 준비물 챙기기', done: false },
+      { id: 't3', title: '공부하기', done: false }
+    ],
+    m2: [
+      { id: 't4', title: '물 1L 마시기', done: true },
+      { id: 't5', title: '스트레칭 10분', done: false }
+    ],
+    m3: [
+      { id: 't6', title: '산책 20분', done: false }
+    ]
+  },
+  studies: [
+    { id: 's1', title: '받아쓰기 연습', detail: '10문제', reward: 100, pinned: true, done: false },
+    { id: 's2', title: '국어 풀기', detail: '4장', reward: 100, pinned: true, done: false },
+    { id: 's3', title: '수학 연산', detail: '4장', reward: 100, pinned: true, done: false },
+    { id: 's4', title: '영단어 복습', detail: '하루 분량', reward: 50, pinned: true, done: false }
+  ],
+  stamps: {},
+  missions: [
+    { emoji: '🥕', text: '저녁 준비 같이 돕기' },
+    { emoji: '🧹', text: '거실 5분 같이 정리하기' },
+    { emoji: '🚶', text: '저녁 먹고 15분 산책하기' },
+    { emoji: '💧', text: '가족 모두 물 한 잔씩 건배!' },
+    { emoji: '🫶', text: '오늘 고마웠던 일 하나 말하기' },
+    { emoji: '📖', text: '자기 전 10분 각자 책 읽기' }
+  ],
+  missionIndex: 0,
+  missionDoneDate: null,
+  missionTotalCount: 0,
+  chat: {
+    activeMemberId: 'm1',
+    deviceLocked: false,
+    soundOn: true,
+    messages: [
+      { id: 'c1', senderId: 'm2', type: 'text', text: '오늘도 화이팅! 할 일 다 하면 하이파이브 하자 🙌', time: '오전 9:00', hearts: 1 },
+      { id: 'c2', senderId: 'm1', type: 'sticker', text: '🥳', time: '오전 9:05', hearts: 2 }
+    ]
+  },
+  ledger: {
+    startMoney: 10000,
+    dailyStudyLog: {}, // 'YYYY-MM-DD': { count: N, amount: N }
+    transactions: []   // { id, date, type: 'income'|'expense'|'study', amount, memo }
+  },
+  alarm: {
+    enabled: false,
+    time: '21:30',
+    lastFiredDate: null
+  },
+  lastStudyResetDate: todayKey()
+};
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return structuredClone(DEFAULT_STATE);
+    const parsed = JSON.parse(raw);
+    return { ...structuredClone(DEFAULT_STATE), ...parsed };
+  } catch {
+    return structuredClone(DEFAULT_STATE);
+  }
+}
+
+let state = loadState();
+let currentTab = 'all';
+let timerMode = 'countdown'; // countdown | stopwatch
+let timerSeconds = 600;
+let baseCountdownSeconds = 600;
+let timerInterval = null;
+let mediaRecorder = null;
+let audioChunks = [];
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function dailyAutoReset() {
+  const tk = todayKey();
+  if (state.lastStudyResetDate !== tk) {
+    state.studies = state.studies.map(s => s.pinned ? { ...s, done: false } : s);
+    state.lastStudyResetDate = tk;
+    saveState();
+  }
+}
+
+/* Audio Chime (no external mp3 needed) */
+function playChime(freq = 660) {
+  if (!state.chat.soundOn) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = ctx.currentTime;
+    [freq, freq * 1.25].forEach((f, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + idx * 0.12);
+      gain.gain.setValueAtTime(0.08, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.26);
+    });
+  } catch {}
+}
+
+function showCoinToast(text) {
+  const el = document.createElement('div');
+  el.className = 'coin-toast';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1300);
+}
+
+/* Tabs */
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('section[data-section]').forEach(sec => {
+    sec.classList.toggle('hidden', tab !== 'all' && sec.dataset.section !== tab);
+  });
+}
+
+/* Weather */
+async function loadWeather() {
+  try {
+    const { name, lat, lon } = state.city;
+    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul`;
+    const aUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5&timezone=Asia%2FSeoul`;
+    const [wRes, aRes] = await Promise.all([fetch(wUrl), fetch(aUrl)]);
+    const w = await wRes.json();
+    const a = await aRes.json();
+
+    const temp = Math.round(w.current.temperature_2m);
+    const tMin = Math.round(w.daily.temperature_2m_min[0]);
+    const tMax = Math.round(w.daily.temperature_2m_max[0]);
+    const code = w.current.weather_code;
+    const mapCode = c => c === 0 ? ['☀️','맑음'] : c <= 3 ? ['⛅','구름 조금'] : c <= 48 ? ['🌫️','안개'] : c <= 67 ? ['🌧️','비'] : c <= 77 ? ['❄️','눈'] : ['🌦️','소나기'];
+    const [icon, desc] = mapCode(code);
+
+    document.getElementById('weatherIcon').textContent = icon;
+    document.getElementById('weatherMainText').textContent = `${name} ${temp}° ${desc} · 최저 ${tMin}° 최고 ${tMax}°`;
+
+    const pm10 = Math.round(a.current.pm10 ?? 25);
+    const pm25 = Math.round(a.current.pm2_5 ?? 12);
+    const pm10Text = pm10 <= 30 ? '좋음' : pm10 <= 80 ? '보통' : '나쁨';
+    const pm25Text = pm25 <= 15 ? '좋음' : pm25 <= 35 ? '보통' : '나쁨';
+    document.getElementById('pm10Badge').textContent = `미세먼지 ${pm10Text}`;
+    document.getElementById('pm25Badge').textContent = `초미세먼지 ${pm25Text}`;
+    document.getElementById('weatherTip').textContent = pm25 > 35 ? '😷 마스크 챙겨요' : '🌿 환기하기 좋아요';
+  } catch {
+    document.getElementById('weatherMainText').textContent = `${state.city.name} · 오프라인 모드`;
+    document.getElementById('pm10Badge').textContent = '날씨 대기';
+    document.getElementById('pm25Badge').textContent = '설정에서 지역 변경';
+  }
+}
+
+/* Header Date */
+function renderDate() {
+  const now = new Date();
+  const days = ['일','월','화','수','목','금','토'];
+  document.getElementById('todayText').textContent =
+    `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 ${days[now.getDay()]}요일 · 우리 집의 포근한 하루`;
+  document.getElementById('appLogo').textContent = state.appLogo;
+  const parts = state.appName.split(' ');
+  if (parts.length > 1) {
+    const last = parts.pop();
+    document.getElementById('appTitle').innerHTML = `${escapeHtml(parts.join(' '))} <span>${escapeHtml(last)}</span>`;
+  } else {
+    document.getElementById('appTitle').textContent = state.appName;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+/* Ledger math */
+function calcLedgerSummary() {
+  const studyTotal = Object.values(state.ledger.dailyStudyLog).reduce((acc, d) => acc + (d.amount || 0), 0);
+  let income = 0, expense = 0;
+  state.ledger.transactions.forEach(tx => {
+    if (tx.type === 'income') income += tx.amount;
+    if (tx.type === 'expense') expense += tx.amount;
+  });
+  const total = (Number(state.ledger.startMoney) || 0) + studyTotal + income - expense;
+  return { start: Number(state.ledger.startMoney) || 0, studyTotal, income, expense, total };
+}
+
+/* Render Member Summary */
+function renderMemberSummary() {
+  const { total } = calcLedgerSummary();
+  const wrap = document.getElementById('memberSummaryCard');
+  wrap.innerHTML = state.members.map((m, idx) => {
+    const todos = state.todos[m.id] || [];
+    const doneCnt = todos.filter(t => t.done).length;
+    const studyCnt = idx === 0 ? state.studies.filter(s => s.done).length : 0;
+    const stars = doneCnt + studyCnt;
+    return `
+      <div class="member-row">
+        <div class="member-left">
+          <div class="avatar-box">${escapeHtml(m.avatar)}</div>
+          <div>
+            <div class="member-name">${escapeHtml(m.name)}</div>
+            <div class="member-sub">${escapeHtml(m.mascot)}</div>
+          </div>
+        </div>
+        <div class="member-stats" onclick="switchTab('ledger')">
+          <div class="star-score">⭐ ${stars}</div>
+          <div class="piggy-link">🐷 ${idx === 0 ? total.toLocaleString() + '원' : '돼지저금통'}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* Stamps */
+function stampToday() {
+  const tk = todayKey();
+  if (!state.stamps[tk]) {
+    state.stamps[tk] = true;
+    saveState();
+  }
+}
+
+function calcStreak() {
+  let streak = 0;
+  const d = new Date();
+  while (true) {
+    const k = todayKey(d);
+    if (state.stamps[k]) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else break;
+  }
+  return streak;
+}
+
+function renderStamps() {
+  const now = new Date();
+  const day = now.getDay(); // 0 Sun..6 Sat
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const labels = ['월','화','수','목','금','토','일'];
+  const tk = todayKey();
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() + mondayOffset + i);
+    const k = todayKey(d);
+    const stamped = !!state.stamps[k];
+    const isToday = k === tk;
+    html += `
+      <div class="stamp-day">
+        <span class="stamp-label">${labels[i]}</span>
+        <div class="stamp-circle ${stamped ? 'stamped' : ''} ${isToday ? 'today' : ''}" onclick="toggleStamp('${k}')">
+          ${stamped ? escapeHtml(state.members[0]?.avatar || '🌟') : ''}
+        </div>
+      </div>
+    `;
+  }
+  document.getElementById('weekStamps').innerHTML = html;
+
+  const ym = tk.slice(0, 7);
+  const monthCount = Object.keys(state.stamps).filter(k => k.startsWith(ym) && state.stamps[k]).length;
+  const todayMark = state.stamps[tk] ? ' · 오늘 찍음' : '';
+  document.getElementById('monthStampBadge').textContent = `이번 달 도장 ${monthCount}개${todayMark}`;
+  document.getElementById('streakBadge').textContent = `🔥 ${calcStreak()}일 연속`;
+}
+
+function toggleStamp(dateKey) {
+  state.stamps[dateKey] = !state.stamps[dateKey];
+  if (!state.stamps[dateKey]) delete state.stamps[dateKey];
+  saveState();
+  renderStamps();
+}
+
+function openStampCalendar() {
+  const now = new Date();
+  const y = now.getFullYear(), m = now.getMonth();
+  const firstDay = new Date(y, m, 1).getDay();
+  const lastDate = new Date(y, m + 1, 0).getDate();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
+  let cells = ['월','화','수','목','금','토','일'].map(d => `<div style="font-size:11px;font-weight:800;color:var(--muted);">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) cells += '<div></div>';
+  for (let day = 1; day <= lastDate; day++) {
+    const k = `${y}-${String(m+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const stamped = !!state.stamps[k];
+    cells += `<div class="cal-cell ${stamped ? 'stamped' : ''}"><span>${day}</span><span>${stamped ? '🐾' : ''}</span></div>`;
+  }
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">📅 ${y}년 ${m+1}월 도장판</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div class="cal-grid">${cells}</div>
+  `);
+}
+
+/* Family Mission */
+function renderMission() {
+  const m = state.missions[state.missionIndex % state.missions.length] || { emoji: '🎲', text: '가족과 함께 웃기' };
+  document.getElementById('missionEmoji').textContent = m.emoji;
+  document.getElementById('missionText').textContent = m.text;
+  document.getElementById('missionCountBadge').textContent = `함께 ${state.missionTotalCount}번`;
+  document.getElementById('missionDoneTag').classList.toggle('hidden', state.missionDoneDate !== todayKey());
+}
+
+function completeMission() {
+  if (state.missionDoneDate !== todayKey()) {
+    state.missionTotalCount++;
+    state.missionDoneDate = todayKey();
+    stampToday();
+    saveState();
+    playChime(784);
+    showCoinToast('🙌 오늘의 가족 미션 클리어!');
+  } else {
+    showCoinToast('✨ 오늘 미션 이미 완료했어요!');
+  }
+  renderMission();
+  renderStamps();
+}
+
+function nextMission() {
+  state.missionIndex = (state.missionIndex + 1) % state.missions.length;
+  state.missionDoneDate = null;
+  saveState();
+  renderMission();
+}
+
+/* Todos */
+function renderTodos() {
+  const wrap = document.getElementById('todoCardsWrap');
+  wrap.innerHTML = state.members.map(m => {
+    const list = state.todos[m.id] || [];
+    const doneCount = list.filter(t => t.done).length;
+    const allDone = list.length > 0 && doneCount === list.length;
+    return `
+      <div class="card">
+        <div class="card-head">
+          <div style="display:flex; align-items:center; gap:9px;">
+            <div class="avatar-box" style="width:40px;height:40px;font-size:21px;">${escapeHtml(m.avatar)}</div>
+            <div>
+              <div style="font-size:15.5px;font-weight:800;">${escapeHtml(m.name)}</div>
+              <div style="font-size:12px;color:var(--muted);">${doneCount}/${list.length}개 완료</div>
+            </div>
+          </div>
+          ${allDone ? '<span class="badge badge-green">🙌 하이파이브!</span>' : ''}
+        </div>
+        ${allDone ? '<div class="highfive-banner">🙌 하이파이브! 오늘 할 일을 모두 끝냈어요!</div>' : ''}
+        <div class="item-list">
+          ${list.map(t => `
+            <div class="task-item ${t.done ? 'done' : ''}">
+              <div class="task-left" onclick="toggleTodo('${m.id}','${t.id}')">
+                <div class="chk">${t.done ? '✓' : ''}</div>
+                <div class="task-title">${escapeHtml(t.title)}</div>
+              </div>
+              <div class="task-btns">
+                <button class="mini-icon-btn" onclick="editTodo('${m.id}','${t.id}')">✏️</button>
+                <button class="mini-icon-btn" onclick="deleteTodo('${m.id}','${t.id}')">✕</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-full" onclick="addTodo('${m.id}')">+ ${escapeHtml(m.name)} 할 일 추가</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleTodo(memberId, todoId) {
+  const list = state.todos[memberId] || [];
+  const item = list.find(t => t.id === todoId);
+  if (!item) return;
+  item.done = !item.done;
+  if (item.done) {
+    stampToday();
+    const allDone = list.every(t => t.done);
+    if (allDone) {
+      playChime(880);
+      showCoinToast(`🙌 ${state.members.find(m => m.id === memberId)?.name || ''} 할 일 완료 하이파이브!`);
+    }
+  }
+  saveState();
+  renderTodos();
+  renderMemberSummary();
+  renderStamps();
+}
+
+function addTodo(memberId) {
+  const title = prompt('추가할 할 일을 적어주세요:');
+  if (!title || !title.trim()) return;
+  state.todos[memberId] = state.todos[memberId] || [];
+  state.todos[memberId].push({ id: 't' + Date.now(), title: title.trim(), done: false });
+  saveState();
+  renderTodos();
+  renderMemberSummary();
+}
+
+function editTodo(memberId, todoId) {
+  const item = (state.todos[memberId] || []).find(t => t.id === todoId);
+  if (!item) return;
+  const next = prompt('할 일 수정:', item.title);
+  if (next && next.trim()) {
+    item.title = next.trim();
+    saveState();
+    renderTodos();
+  }
+}
+
+function deleteTodo(memberId, todoId) {
+  state.todos[memberId] = (state.todos[memberId] || []).filter(t => t.id !== todoId);
+  saveState();
+  renderTodos();
+  renderMemberSummary();
+}
+
+/* Study Plan */
+function renderStudies() {
+  const total = state.studies.length;
+  const done = state.studies.filter(s => s.done).length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('studyProgressBar').style.width = `${pct}%`;
+  document.getElementById('studyProgressText').textContent = `${done} / ${total} 완료`;
+
+  const tk = todayKey();
+  const todayEarn = state.ledger.dailyStudyLog[tk]?.amount || 0;
+  document.getElementById('studyEarnBadge').textContent = `오늘 +${todayEarn.toLocaleString()}원`;
+
+  document.getElementById('studyList').innerHTML = state.studies.map(s => `
+    <div class="task-item study ${s.done ? 'done' : ''}">
+      <div class="task-left" onclick="toggleStudy('${s.id}')">
+        <div class="chk">${s.done ? '✓' : ''}</div>
+        <div>
+          <div class="task-title">${escapeHtml(s.title)}</div>
+          <div class="task-meta">
+            ${s.detail ? `<span class="chip">${escapeHtml(s.detail)}</span>` : ''}
+            <span class="chip chip-coin">🪙 ${Number(s.reward).toLocaleString()}원</span>
+          </div>
+        </div>
+      </div>
+      <div class="task-btns">
+        <button class="mini-icon-btn ${s.pinned ? 'pinned' : ''}" title="매일 고정" onclick="toggleStudyPin('${s.id}')">📌</button>
+        <button class="mini-icon-btn" onclick="editStudy('${s.id}')">✏️</button>
+        <button class="mini-icon-btn" onclick="deleteStudy('${s.id}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleStudy(id) {
+  const s = state.studies.find(x => x.id === id);
+  if (!s) return;
+  s.done = !s.done;
+  const tk = todayKey();
+  const log = state.ledger.dailyStudyLog[tk] || { count: 0, amount: 0 };
+  const reward = Number(s.reward) || 0;
+
+  if (s.done) {
+    log.count += 1;
+    log.amount += reward;
+    stampToday();
+    playChime(740);
+    showCoinToast(`🪙 +${reward.toLocaleString()}원 용돈 적립!`);
+  } else {
+    log.count = Math.max(0, log.count - 1);
+    log.amount = Math.max(0, log.amount - reward);
+  }
+  state.ledger.dailyStudyLog[tk] = log;
+  saveState();
+  renderStudies();
+  renderStamps();
+  renderMemberSummary();
+  renderLedger();
+}
+
+function toggleStudyPin(id) {
+  const s = state.studies.find(x => x.id === id);
+  if (!s) return;
+  s.pinned = !s.pinned;
+  saveState();
+  renderStudies();
+}
+
+function resetDailyFixedStudies() {
+  state.studies = state.studies.map(s => s.pinned ? { ...s, done: false } : s);
+  saveState();
+  renderStudies();
+  showCoinToast('📌 고정 항목이 새로 리셋됐어요');
+}
+
+function openAddStudyModal() {
+  openModal(`
+    <h2 class="card-title" style="margin-bottom:12px;">📚 공부 항목 추가</h2>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <input type="text" id="newStudyTitle" placeholder="과목/공부명 (예: 수학 익힘책)" />
+      <input type="text" id="newStudyDetail" placeholder="분량 (예: 4장, 20분)" />
+      <input type="number" id="newStudyReward" value="100" placeholder="적립 금액(원)" />
+      <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700;">
+        <input type="checkbox" id="newStudyPinned" checked /> 매일 고정 항목으로 등록
+      </label>
+      <div class="btn-row" style="margin-top:6px;">
+        <button class="btn" onclick="closeModal()">취소</button>
+        <button class="btn btn-blue" onclick="saveNewStudy()">추가하기</button>
+      </div>
+    </div>
+  `);
+}
+
+function saveNewStudy() {
+  const title = document.getElementById('newStudyTitle').value.trim();
+  const detail = document.getElementById('newStudyDetail').value.trim();
+  const reward = Number(document.getElementById('newStudyReward').value) || 0;
+  const pinned = document.getElementById('newStudyPinned').checked;
+  if (!title) return;
+  state.studies.push({ id: 's' + Date.now(), title, detail, reward, pinned, done: false });
+  saveState();
+  closeModal();
+  renderStudies();
+}
+
+function editStudy(id) {
+  const s = state.studies.find(x => x.id === id);
+  if (!s) return;
+  const title = prompt('공부명 수정:', s.title);
+  if (title === null) return;
+  const reward = prompt('적립 금액(원):', s.reward);
+  if (title.trim()) s.title = title.trim();
+  if (reward !== null && !isNaN(Number(reward))) s.reward = Number(reward);
+  saveState();
+  renderStudies();
+}
+
+function deleteStudy(id) {
+  state.studies = state.studies.filter(x => x.id !== id);
+  saveState();
+  renderStudies();
+}
+
+/* Timer & Tablet Alarm */
+function formatMMSS(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, '0');
+  const s = String(sec % 60).padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function renderTimer() {
+  document.getElementById('timerDisplay').textContent = formatMMSS(timerSeconds);
+  document.getElementById('modeCountdownBtn').classList.toggle('active', timerMode === 'countdown');
+  document.getElementById('modeStopwatchBtn').classList.toggle('active', timerMode === 'stopwatch');
+  document.getElementById('timerStartBtn').textContent = timerInterval ? '⏸ 일시정지' : '▶ 시작';
+  document.getElementById('timerHint').textContent =
+    timerMode === 'countdown'
+      ? `${Math.round(baseCountdownSeconds / 60)}분 · 시작을 눌러요`
+      : '공부한 시간을 재고 있어요';
+  document.getElementById('tabletAlarmOn').checked = !!state.alarm.enabled;
+  document.getElementById('tabletAlarmTime').value = state.alarm.time || '21:30';
+}
+
+function setTimerMode(mode) {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerMode = mode;
+  timerSeconds = mode === 'countdown' ? baseCountdownSeconds : 0;
+  renderTimer();
+}
+
+function setPresetMinutes(min) {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerMode = 'countdown';
+  baseCountdownSeconds = min * 60;
+  timerSeconds = baseCountdownSeconds;
+  renderTimer();
+}
+
+function applyCustomMinutes() {
+  const val = Number(document.getElementById('customMinutesInput').value);
+  if (val >= 1 && val <= 180) setPresetMinutes(val);
+}
+
+function toggleTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    renderTimer();
+    return;
+  }
+  timerInterval = setInterval(() => {
+    if (timerMode === 'countdown') {
+      if (timerSeconds > 0) {
+        timerSeconds--;
+        renderTimer();
+      } else {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        renderTimer();
+        triggerAlarmNotice('🎉 공부 타이머가 완료되었어요! 잠깐 쉬어가요.');
+      }
+    } else {
+      timerSeconds++;
+      renderTimer();
+    }
+  }, 1000);
+  renderTimer();
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerSeconds = timerMode === 'countdown' ? baseCountdownSeconds : 0;
+  renderTimer();
+}
+
+function saveTabletAlarm() {
+  state.alarm.enabled = document.getElementById('tabletAlarmOn').checked;
+  state.alarm.time = document.getElementById('tabletAlarmTime').value || '21:30';
+  saveState();
+}
+
+function triggerAlarmNotice(msg) {
+  playChime(880);
+  setTimeout(() => playChime(660), 300);
+  openModal(`
+    <div style="text-align:center; padding:12px 4px;">
+      <div style="font-size:48px; margin-bottom:10px;">⏰</div>
+      <h2 style="margin:0 0 8px; font-size:19px;">알람이 울렸어요!</h2>
+      <p style="font-size:14px; color:var(--muted); line-height:1.5; margin:0 0 16px;">${escapeHtml(msg)}</p>
+      <button class="btn btn-green btn-full" onclick="closeModal()">확인했어요</button>
+    </div>
+  `);
+}
+
+setInterval(() => {
+  if (!state.alarm.enabled || !state.alarm.time) return;
+  const now = new Date();
+  const hhmm = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  const tk = todayKey(now);
+  if (hhmm === state.alarm.time && state.alarm.lastFiredDate !== tk) {
+    state.alarm.lastFiredDate = tk;
+    saveState();
+    triggerAlarmNotice(`약속한 태블릿 종료 시간(${state.alarm.time})이 되었어요! 오늘도 수고했어요.`);
+  }
+}, 5000);
+
+/* Chat */
+const STICKERS = ['🥳','🙌','❤️','😭','👍','🌟','🐰','🐻','😴'];
+
+function renderChat() {
+  document.getElementById('chatSoundBtn').textContent = state.chat.soundOn ? '🔔 알림음 켜짐' : '🔕 알림음 꺼짐';
+  document.getElementById('deviceLockBtn').textContent = state.chat.deviceLocked ? '🔒 잠금 해제' : '🔓 이 기기 잠금';
+  document.getElementById('chatLockStatus').textContent = state.chat.deviceLocked
+    ? '이 기기에 프로필이 고정되어 있어요'
+    : '한 번 고르면 이 기기에 기억돼요';
+
+  document.getElementById('chatProfileBar').innerHTML = state.members.map(m => `
+    <button class="profile-chip ${state.chat.activeMemberId === m.id ? 'active' : ''}" onclick="selectChatProfile('${m.id}')">
+      <span>${escapeHtml(m.avatar)}</span><span>${escapeHtml(m.name)}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('stickerBar').innerHTML = STICKERS.map(st =>
+    `<button class="sticker-pick" onclick="sendChatSticker('${st}')">${st}</button>`
+  ).join('');
+
+  const feed = document.getElementById('chatFeed');
+  feed.innerHTML = state.chat.messages.map(msg => {
+    const sender = state.members.find(m => m.id === msg.senderId) || state.members[0];
+    const isMine = msg.senderId === state.chat.activeMemberId;
+    let body = '';
+    if (msg.type === 'sticker') body = `<div class="msg-sticker">${escapeHtml(msg.text)}</div>`;
+    else if (msg.type === 'audio') body = `<div class="msg-bubble"><audio controls src="${msg.audio}"></audio></div>`;
+    else body = `<div class="msg-bubble">${escapeHtml(msg.text)}</div>`;
+
+    return `
+      <div class="msg-row ${isMine ? 'mine' : ''}">
+        <div class="msg-avatar">${escapeHtml(sender.avatar)}</div>
+        <div class="msg-col">
+          <div class="msg-sender">${escapeHtml(sender.name)} · ${escapeHtml(msg.time)}</div>
+          ${body}
+          <div class="msg-actions">
+            <button class="heart-btn" onclick="heartMsg('${msg.id}')">❤️ ${msg.hearts || 0}</button>
+            <button class="heart-btn" onclick="deleteMsg('${msg.id}')">✕</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function selectChatProfile(id) {
+  if (state.chat.deviceLocked) {
+    showCoinToast('🔒 이 기기 잠금을 먼저 풀어주세요');
+    return;
+  }
+  state.chat.activeMemberId = id;
+  saveState();
+  renderChat();
+}
+
+function toggleDeviceLock() {
+  state.chat.deviceLocked = !state.chat.deviceLocked;
+  saveState();
+  renderChat();
+}
+
+function toggleChatSound() {
+  state.chat.soundOn = !state.chat.soundOn;
+  saveState();
+  renderChat();
+}
+
+function nowTimeText() {
+  return new Date().toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+}
+
+function sendChatText() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'text', text, time: nowTimeText(), hearts: 0 });
+  input.value = '';
+  saveState();
+  playChime(587);
+  renderChat();
+}
+
+function sendChatSticker(st) {
+  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'sticker', text: st, time: nowTimeText(), hearts: 0 });
+  saveState();
+  playChime(659);
+  renderChat();
+}
+
+async function toggleVoiceRecord() {
+  const btn = document.getElementById('voiceRecBtn');
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    btn.textContent = '🎙️';
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'audio', audio: reader.result, time: nowTimeText(), hearts: 0 });
+        saveState();
+        renderChat();
+      };
+      reader.readAsDataURL(blob);
+    };
+    mediaRecorder.start();
+    btn.textContent = '⏹️';
+    showCoinToast('🎙️ 녹음 중... 다시 누르면 전송돼요');
+  } catch {
+    alert('이 브라우저 환경에서는 마이크 권한(HTTPS 또는 브라우저 허용)이 필요해요.');
+  }
+}
+
+function heartMsg(id) {
+  const m = state.chat.messages.find(x => x.id === id);
+  if (!m) return;
+  m.hearts = (m.hearts || 0) + 1;
+  saveState();
+  renderChat();
+}
+
+function deleteMsg(id) {
+  state.chat.messages = state.chat.messages.filter(x => x.id !== id);
+  saveState();
+  renderChat();
+}
+
+/* Ledger */
+function renderLedger() {
+  const { start, studyTotal, income, expense, total } = calcLedgerSummary();
+  document.getElementById('ledgerMemberBadge').textContent = state.members[0]?.name || '대표';
+  document.getElementById('ledgerTotalAmount').textContent = `${total.toLocaleString()}원`;
+  document.getElementById('startMoneyInput').value = start;
+  document.getElementById('ledgerSummaryPills').innerHTML = `
+    <span class="badge badge-gray">시작 금액 ${start.toLocaleString()}원</span>
+    <span class="badge badge-green">공부 적립 +${studyTotal.toLocaleString()}원</span>
+    <span class="badge badge-blue">입금 +${income.toLocaleString()}원</span>
+    <span class="badge">사용 -${expense.toLocaleString()}원</span>
+  `;
+
+  const studyRows = Object.entries(state.ledger.dailyStudyLog)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([date, info]) => `
+      <div class="task-item">
+        <div>
+          <div class="task-title">📚 ${date} 공부 완료 ${info.count}개</div>
+        </div>
+        <span class="chip chip-coin">+${info.amount.toLocaleString()}원</span>
+      </div>
+    `);
+
+  const txRows = [...state.ledger.transactions]
+    .reverse()
+    .map(tx => `
+      <div class="task-item">
+        <div>
+          <div class="task-title">${tx.type === 'income' ? '💰 입금' : '🛍️ 사용'} · ${escapeHtml(tx.memo)}</div>
+          <div class="date-sub">${tx.date}</div>
+        </div>
+        <span class="chip ${tx.type === 'income' ? 'chip-coin' : ''}">${tx.type === 'income' ? '+' : '-'}${tx.amount.toLocaleString()}원</span>
+      </div>
+    `);
+
+  document.getElementById('ledgerHistoryList').innerHTML =
+    [...txRows, ...studyRows].join('') || '<div class="date-sub">아직 기록된 내역이 없어요.</div>';
+}
+
+function saveStartMoney() {
+  state.ledger.startMoney = Number(document.getElementById('startMoneyInput').value) || 0;
+  saveState();
+  renderLedger();
+  renderMemberSummary();
+  showCoinToast('💰 시작 금액을 저장했어요');
+}
+
+function addLedgerTx(type) {
+  const amount = Number(document.getElementById('txAmountInput').value);
+  const memo = document.getElementById('txMemoInput').value.trim() || (type === 'income' ? '용돈 입금' : '용돈 사용');
+  if (!amount || amount <= 0) return;
+  state.ledger.transactions.push({ id: 'tx' + Date.now(), date: todayKey(), type, amount, memo });
+  document.getElementById('txAmountInput').value = '';
+  document.getElementById('txMemoInput').value = '';
+  saveState();
+  renderLedger();
+  renderMemberSummary();
+  showCoinToast(type === 'income' ? `🪙 +${amount.toLocaleString()}원 입금!` : `💸 -${amount.toLocaleString()}원 기록!`);
+}
+
+/* Settings & Export */
+function openSettings() {
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">⚙️ 대시보드 맞춤 설정</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div>
+        <label style="font-size:12px;font-weight:700;">대시보드 이름</label>
+        <input type="text" id="setAppName" value="${escapeHtml(state.appName)}" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;">동네 이름 (날씨 표시용)</label>
+        <input type="text" id="setCityName" value="${escapeHtml(state.city.name)}" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;">구성원 이름 / 이모지</label>
+        ${state.members.map((m, i) => `
+          <div style="display:flex; gap:6px; margin-top:6px;">
+            <input type="text" id="setAvatar${i}" value="${escapeHtml(m.avatar)}" style="width:54px; text-align:center;" />
+            <input type="text" id="setName${i}" value="${escapeHtml(m.name)}" />
+          </div>
+        `).join('')}
+      </div>
+      <div class="btn-row" style="margin-top:6px;">
+        <button class="btn btn-danger" onclick="resetAllData()">초기화</button>
+        <button class="btn btn-green" onclick="saveSettings()">저장하기</button>
+      </div>
+    </div>
+  `);
+}
+
+function saveSettings() {
+  state.appName = document.getElementById('setAppName').value.trim() || '우리 가족 기록장';
+  state.city.name = document.getElementById('setCityName').value.trim() || '대구 침산동';
+  state.members.forEach((m, i) => {
+    m.avatar = document.getElementById(`setAvatar${i}`).value.trim() || m.avatar;
+    m.name = document.getElementById(`setName${i}`).value.trim() || m.name;
+  });
+  saveState();
+  closeModal();
+  renderAll();
+  loadWeather();
+}
+
+function resetAllData() {
+  if (!confirm('모든 기록을 초기 샘플 상태로 되돌릴까요?')) return;
+  state = structuredClone(DEFAULT_STATE);
+  saveState();
+  closeModal();
+  renderAll();
+}
+
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `family-dashboard-backup-${todayKey()}.json`;
+  a.click();
+}
+
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+}
+
+function renderAll() {
+  dailyAutoReset();
+  renderDate();
+  renderMemberSummary();
+  renderStamps();
+  renderMission();
+  renderTodos();
+  renderStudies();
+  renderTimer();
+  renderChat();
+  renderLedger();
+}
+
+renderAll();
+loadWeather();
+</script>
+</body>
+</html>
