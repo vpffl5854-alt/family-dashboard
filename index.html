@@ -2037,6 +2037,13 @@ function sortByPosition(list) {
     .map(o => o.x);
 }
 
+/* 항목 순서를 유지한 채 제자리에 넣기 (실시간 단건 변경용) */
+function insertAt(list, position, item) {
+  const pos = Number(position);
+  if (Number.isFinite(pos) && pos >= 0 && pos <= list.length) list.splice(pos, 0, item);
+  else list.push(item);
+}
+
 function setSyncBadge(kind, text) {
   const el = document.getElementById('syncBadge');
   if (!el) return;
@@ -2333,14 +2340,18 @@ function applyRowEvent(table, payload) {
   }
 
   if (table === 'members') {
-    const list = (state.members || []).filter(m => m.id !== row.id);
-    if (!gone) list.push({
-      id: row.id, name: row.name, role: row.role || '', avatar: row.avatar || '',
-      mascot: row.mascot || '', position: row.position
-    });
-    state.members = sortByPosition(list).map(m => ({
-      id: m.id, name: m.name, role: m.role || '', avatar: m.avatar || '', mascot: m.mascot || ''
-    }));
+    const list = (state.members || []).slice();
+    const idx = list.findIndex(m => m.id === row.id);
+    if (gone) {
+      if (idx >= 0) list.splice(idx, 1);
+    } else {
+      const item = {
+        id: row.id, name: row.name, role: row.role || '', avatar: row.avatar || '', mascot: row.mascot || ''
+      };
+      if (idx >= 0) list[idx] = item;
+      else insertAt(list, row.position, item);
+    }
+    state.members = list;
     if (!state.members.some(m => m.id === state.chat.activeMemberId) && state.members[0]) {
       state.chat.activeMemberId = state.members[0].id;
     }
@@ -2355,29 +2366,47 @@ function applyRowEvent(table, payload) {
       return;
     }
     const mid = row.member_id;
-    const list = (state.todos[mid] || []).filter(t => t.id !== row.id);
-    if (!gone) list.push({ id: row.id, title: row.title, done: !!row.done, position: row.position });
-    state.todos[mid] = sortByPosition(list).map(t => ({ id: t.id, title: t.title, done: !!t.done }));
+    const list = (state.todos[mid] || []).slice();
+    const idx = list.findIndex(t => t.id === row.id);
+    if (gone) {
+      if (idx >= 0) list.splice(idx, 1);
+    } else if (idx >= 0) {
+      list[idx] = Object.assign({}, list[idx], { title: row.title, done: !!row.done });
+    } else {
+      insertAt(list, row.position, { id: row.id, title: row.title, done: !!row.done });
+    }
+    state.todos[mid] = list;
     return;
   }
 
   if (table === 'studies') {
-    const list = (state.studies || []).filter(s => s.id !== row.id);
-    if (!gone) list.push({
-      id: row.id, title: row.title, detail: row.detail || '',
-      reward: Number(row.reward) || 0, pinned: !!row.pinned, done: !!row.done, position: row.position
-    });
-    state.studies = sortByPosition(list).map(s => ({
-      id: s.id, title: s.title, detail: s.detail || '',
-      reward: Number(s.reward) || 0, pinned: !!s.pinned, done: !!s.done
-    }));
+    const list = (state.studies || []).slice();
+    const idx = list.findIndex(s => s.id === row.id);
+    if (gone) {
+      if (idx >= 0) list.splice(idx, 1);
+    } else {
+      const item = {
+        id: row.id, title: row.title, detail: row.detail || '',
+        reward: Number(row.reward) || 0, pinned: !!row.pinned, done: !!row.done
+      };
+      if (idx >= 0) list[idx] = item;
+      else insertAt(list, row.position, item);
+    }
+    state.studies = list;
     return;
   }
 
   if (table === 'missions') {
-    const list = (state.missions || []).filter(m => m.id !== row.id);
-    if (!gone) list.push({ id: row.id, emoji: row.emoji || '🎲', text: row.text, position: row.position });
-    state.missions = sortByPosition(list).map(m => ({ id: m.id, emoji: m.emoji || '🎲', text: m.text }));
+    const list = (state.missions || []).slice();
+    const idx = list.findIndex(m => m.id === row.id);
+    if (gone) {
+      if (idx >= 0) list.splice(idx, 1);
+    } else {
+      const item = { id: row.id, emoji: row.emoji || '🎲', text: row.text };
+      if (idx >= 0) list[idx] = item;
+      else insertAt(list, row.position, item);
+    }
+    state.missions = list;
     if (!state.missions.length) state.missions = structuredClone(DEFAULT_STATE.missions);
     return;
   }
