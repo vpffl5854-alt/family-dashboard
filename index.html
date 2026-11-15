@@ -751,6 +751,26 @@
   .cal-cell.stamped { background: #FFF3C4; border-color: #F6AD55; }
   .hidden { display: none !important; }
   audio { max-width: 185px; height: 32px; }
+
+  /* Sync status badge */
+  .sync-badge {
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .sync-badge.live { background: #EFFAF3; border-color: #C7EAD5; color: #2F855A; }
+  .sync-badge.connecting { background: #FFF7E8; border-color: #F6D8AE; color: #B45309; }
+  .sync-badge.warn { background: #FFF4E8; border-color: #F3C99B; color: #B45309; }
+  .sync-badge.offline { background: #F6F3EC; border-color: #E3DCCB; color: #8A7E6B; }
 </style>
 </head>
 <body>
@@ -769,6 +789,7 @@
         <button class="pill-btn" onclick="openSettings()"><span class="dot-online"></span> ⚙️ 설정</button>
         <button class="pill-btn" onclick="exportBackup()">↗</button>
       </div>
+      <span class="sync-badge connecting" id="syncBadge">🟡 연결 중</span>
       <div class="pill-btn" style="font-size:11px; padding:4px 10px;">✨ 오늘도 함께 기록해요</div>
     </div>
   </header>
@@ -898,7 +919,7 @@
         <h2 class="card-title">💬 우리 가족 채팅</h2>
         <button class="pill-btn" id="chatSoundBtn" onclick="toggleChatSound()">🔔 알림음 켜짐</button>
       </div>
-      <p class="card-desc">말풍선, 스티커, 음성 메시지로 가볍게 소통해요. (현재 기기 저장 모드 · 웹 공유는 서버 연결 시 실시간 동기화)</p>
+      <p class="card-desc">말풍선, 스티커, 음성 메시지로 가볍게 소통해요. 같은 가족 코드를 쓰는 기기끼리 실시간으로 함께 보여요.</p>
       <div class="chat-profiles" id="chatProfileBar"></div>
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
         <span class="date-sub" style="margin:0;" id="chatLockStatus">프로필 전환 가능</span>
@@ -959,6 +980,7 @@
   <div class="modal" id="modalContent"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const STORAGE_KEY = 'family_dashboard_v1';
 
@@ -1000,12 +1022,12 @@ const DEFAULT_STATE = {
   ],
   stamps: {},
   missions: [
-    { emoji: '🥕', text: '저녁 준비 같이 돕기' },
-    { emoji: '🧹', text: '거실 5분 같이 정리하기' },
-    { emoji: '🚶', text: '저녁 먹고 15분 산책하기' },
-    { emoji: '💧', text: '가족 모두 물 한 잔씩 건배!' },
-    { emoji: '🫶', text: '오늘 고마웠던 일 하나 말하기' },
-    { emoji: '📖', text: '자기 전 10분 각자 책 읽기' }
+    { id: 'ms1', emoji: '🥕', text: '저녁 준비 같이 돕기' },
+    { id: 'ms2', emoji: '🧹', text: '거실 5분 같이 정리하기' },
+    { id: 'ms3', emoji: '🚶', text: '저녁 먹고 15분 산책하기' },
+    { id: 'ms4', emoji: '💧', text: '가족 모두 물 한 잔씩 건배!' },
+    { id: 'ms5', emoji: '🫶', text: '오늘 고마웠던 일 하나 말하기' },
+    { id: 'ms6', emoji: '📖', text: '자기 전 10분 각자 책 읽기' }
   ],
   missionIndex: 0,
   missionDoneDate: null,
@@ -1015,8 +1037,8 @@ const DEFAULT_STATE = {
     deviceLocked: false,
     soundOn: true,
     messages: [
-      { id: 'c1', senderId: 'm2', type: 'text', text: '오늘도 화이팅! 할 일 다 하면 하이파이브 하자 🙌', time: '오전 9:00', hearts: 1 },
-      { id: 'c2', senderId: 'm1', type: 'sticker', text: '🥳', time: '오전 9:05', hearts: 2 }
+      { id: 'c1', senderId: 'm2', type: 'text', text: '오늘도 화이팅! 할 일 다 하면 하이파이브 하자 🙌', time: '오전 9:00', hearts: 1, seq: 1 },
+      { id: 'c2', senderId: 'm1', type: 'sticker', text: '🥳', time: '오전 9:05', hearts: 2, seq: 2 }
     ]
   },
   ledger: {
@@ -1051,9 +1073,12 @@ let baseCountdownSeconds = 600;
 let timerInterval = null;
 let mediaRecorder = null;
 let audioChunks = [];
+let voiceStopTimer = null;
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (SYNC.applying) return;
+  schedulePush();
 }
 
 function dailyAutoReset() {
@@ -1700,7 +1725,7 @@ function sendChatText() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
   if (!text) return;
-  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'text', text, time: nowTimeText(), hearts: 0 });
+  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'text', text, time: nowTimeText(), hearts: 0, seq: Date.now() });
   input.value = '';
   saveState();
   playChime(587);
@@ -1708,7 +1733,7 @@ function sendChatText() {
 }
 
 function sendChatSticker(st) {
-  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'sticker', text: st, time: nowTimeText(), hearts: 0 });
+  state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'sticker', text: st, time: nowTimeText(), hearts: 0, seq: Date.now() });
   saveState();
   playChime(659);
   renderChat();
@@ -1717,6 +1742,7 @@ function sendChatSticker(st) {
 async function toggleVoiceRecord() {
   const btn = document.getElementById('voiceRecBtn');
   if (mediaRecorder && mediaRecorder.state === 'recording') {
+    clearTimeout(voiceStopTimer);
     mediaRecorder.stop();
     btn.textContent = '🎙️';
     return;
@@ -1724,14 +1750,28 @@ async function toggleVoiceRecord() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioChunks = [];
-    mediaRecorder = new MediaRecorder(stream);
+    try {
+      mediaRecorder = new MediaRecorder(stream, { audioBitsPerSecond: 32000 });
+    } catch {
+      mediaRecorder = new MediaRecorder(stream);
+    }
     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
     mediaRecorder.onstop = () => {
+      clearTimeout(voiceStopTimer);
       stream.getTracks().forEach(t => t.stop());
-      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+      if (blob.size > 150 * 1024) {
+        showCoinToast('🎙️ 음성은 15초 안쪽으로 짧게 보내주세요');
+        return;
+      }
       const reader = new FileReader();
       reader.onloadend = () => {
-        state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'audio', audio: reader.result, time: nowTimeText(), hearts: 0 });
+        const dataUrl = String(reader.result || '');
+        if (!dataUrl || dataUrl.length > CHAT_AUDIO_MAX_CHARS) {
+          showCoinToast('🎙️ 음성 메시지가 너무 커서 보내지 못했어요');
+          return;
+        }
+        state.chat.messages.push({ id: 'c' + Date.now(), senderId: state.chat.activeMemberId, type: 'audio', audio: dataUrl, time: nowTimeText(), hearts: 0, seq: Date.now() });
         saveState();
         renderChat();
       };
@@ -1739,7 +1779,14 @@ async function toggleVoiceRecord() {
     };
     mediaRecorder.start();
     btn.textContent = '⏹️';
-    showCoinToast('🎙️ 녹음 중... 다시 누르면 전송돼요');
+    showCoinToast('🎙️ 녹음 중... 다시 누르면 전송돼요 (최대 20초)');
+    clearTimeout(voiceStopTimer);
+    voiceStopTimer = setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+        document.getElementById('voiceRecBtn').textContent = '🎙️';
+      }
+    }, 20000);
   } catch {
     alert('이 브라우저 환경에서는 마이크 권한(HTTPS 또는 브라우저 허용)이 필요해요.');
   }
@@ -1811,7 +1858,7 @@ function addLedgerTx(type) {
   const amount = Number(document.getElementById('txAmountInput').value);
   const memo = document.getElementById('txMemoInput').value.trim() || (type === 'income' ? '용돈 입금' : '용돈 사용');
   if (!amount || amount <= 0) return;
-  state.ledger.transactions.push({ id: 'tx' + Date.now(), date: todayKey(), type, amount, memo });
+  state.ledger.transactions.push({ id: 'tx' + Date.now(), date: todayKey(), type, amount, memo, seq: Date.now() });
   document.getElementById('txAmountInput').value = '';
   document.getElementById('txMemoInput').value = '';
   saveState();
@@ -1831,6 +1878,12 @@ function openSettings() {
       <div>
         <label style="font-size:12px;font-weight:700;">대시보드 이름</label>
         <input type="text" id="setAppName" value="${escapeHtml(state.appName)}" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;">가족 공유 코드</label>
+        <input type="text" id="setRoomCode" value="${escapeHtml(ROOM_ID)}" />
+        <div class="date-sub">같은 코드를 쓰는 가족 기기끼리 기록이 실시간으로 함께 보여요. 영문 소문자·숫자·- _ 2~32자.</div>
+        <div class="date-sub" style="margin-top:4px;font-weight:700;">${escapeHtml(syncStatusLabel())}</div>
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;">동네 이름 (날씨 표시용)</label>
@@ -1854,6 +1907,12 @@ function openSettings() {
 }
 
 function saveSettings() {
+  const roomField = document.getElementById('setRoomCode');
+  const wantedRoom = roomField ? normalizeRoomCode(roomField.value) : ROOM_ID;
+  if (roomField && !wantedRoom) {
+    showCoinToast('⚠️ 가족 코드는 영문 소문자·숫자 2~32자로 적어주세요');
+    return;
+  }
   state.appName = document.getElementById('setAppName').value.trim() || '우리 가족 기록장';
   state.city.name = document.getElementById('setCityName').value.trim() || '대구 침산동';
   state.members.forEach((m, i) => {
@@ -1862,6 +1921,14 @@ function saveSettings() {
   });
   saveState();
   closeModal();
+  if (wantedRoom && wantedRoom !== ROOM_ID) {
+    if (confirm(`가족 공유 코드를 "${wantedRoom}"(으)로 바꿀까요?\n이 기기는 새 코드의 기록장으로 연결됩니다.`)) {
+      localStorage.setItem(ROOM_STORAGE_KEY, wantedRoom);
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+      return;
+    }
+  }
   renderAll();
   loadWeather();
 }
@@ -1890,6 +1957,606 @@ function closeModal() {
   document.getElementById('modalBackdrop').classList.remove('open');
 }
 
+/* ==================================================================
+   Supabase 실시간 동기화
+   - 항목 단위 테이블(family_*)과 room_id(가족 공유 코드) 기반
+   - localStorage는 캐시/오프라인 폴백, 서버가 진짜 저장소
+   ================================================================== */
+const SUPABASE_URL = 'https://hwhrvamjypamuesueouc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3aHJ2YW1qeXBhbXVlc3Vlb3VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NTM5NDgsImV4cCI6MjExMDMyOTk0OH0.iWJr2T9iA71j_i_xL3Xi54iK4xn1nGjhX7cGIUyTeTc';
+const ROOM_STORAGE_KEY = 'family_dashboard_room_id';
+const DEFAULT_ROOM_ID = 'our-family';
+const CHAT_AUDIO_MAX_CHARS = 210000;
+
+function normalizeRoomCode(input) {
+  const code = String(input || '').trim().toLowerCase();
+  return /^[a-z0-9][a-z0-9_-]{1,31}$/.test(code) ? code : null;
+}
+
+const ROOM_ID = normalizeRoomCode(localStorage.getItem(ROOM_STORAGE_KEY)) || DEFAULT_ROOM_ID;
+
+const SYNC_TABLES = {
+  rooms:         { pk: ['room_id'], fields: ['room_id','app_name','app_logo','city_name','city_lat','city_lon','start_money','alarm_enabled','alarm_time','alarm_last_fired_date','mission_index','mission_done_date','mission_total_count','last_study_reset_date'] },
+  members:       { pk: ['room_id','id'], fields: ['room_id','id','name','role','avatar','mascot','position'] },
+  todos:         { pk: ['room_id','id'], fields: ['room_id','id','member_id','title','done','position'] },
+  studies:       { pk: ['room_id','id'], fields: ['room_id','id','title','detail','reward','pinned','done','position'] },
+  missions:      { pk: ['room_id','id'], fields: ['room_id','id','emoji','text','position'] },
+  study_logs:    { pk: ['room_id','log_date'], fields: ['room_id','log_date','count','amount'] },
+  stamps:        { pk: ['room_id','stamp_date'], fields: ['room_id','stamp_date','stamped'] },
+  chat_messages: { pk: ['room_id','id'], fields: ['room_id','id','sender_id','type','text','audio','time_label','hearts','seq'] },
+  allowance_tx:  { pk: ['room_id','id'], fields: ['room_id','id','tx_date','type','amount','memo','seq'] }
+};
+const SYNC_ORDER = ['rooms','members','todos','studies','missions','study_logs','stamps','chat_messages','allowance_tx'];
+
+const SYNC = {
+  client: null,
+  shadow: null,
+  channel: null,
+  ready: false,
+  online: false,
+  applying: false,
+  pushTimer: null,
+  retryTimer: null,
+  failures: 0
+};
+
+function emptyShadow() {
+  const s = {};
+  SYNC_ORDER.forEach(t => { s[t] = new Map(); });
+  return s;
+}
+
+function rowKey(row, spec) {
+  return spec.pk.map(k => String(row[k])).join('|');
+}
+
+function sameVal(a, b) {
+  const na = (a === undefined || a === null) ? null : a;
+  const nb = (b === undefined || b === null) ? null : b;
+  if (na === nb) return true;
+  if (na === null || nb === null) return false;
+  if (typeof na === 'number' || typeof nb === 'number') {
+    const fa = Number(na), fb = Number(nb);
+    if (Number.isFinite(fa) && Number.isFinite(fb)) return fa === fb;
+  }
+  return String(na) === String(nb);
+}
+
+function sameRow(prev, row, fields) {
+  return fields.every(f => sameVal(prev[f], row[f]));
+}
+
+function sortByPosition(list) {
+  return list
+    .map((x, i) => ({ x, p: Number(x.position), i }))
+    .sort((a, b) => {
+      const av = Number.isFinite(a.p) ? a.p : a.i;
+      const bv = Number.isFinite(b.p) ? b.p : b.i;
+      return av - bv;
+    })
+    .map(o => o.x);
+}
+
+function setSyncBadge(kind, text) {
+  const el = document.getElementById('syncBadge');
+  if (!el) return;
+  const labels = { live: '🟢 실시간 동기화', connecting: '🟡 연결 중', warn: '🟠 동기화 지연', offline: '⚪ 오프라인' };
+  el.className = 'sync-badge ' + kind;
+  el.textContent = text || labels[kind] || '동기화';
+  el.title = '가족 공유 코드: ' + ROOM_ID;
+}
+
+function syncStatusLabel() {
+  if (!SYNC.client) return '⚪ 로컬 저장 모드 (가족 코드 ' + ROOM_ID + ')';
+  if (SYNC.online) return '🟢 실시간 동기화 중 · 가족 코드 ' + ROOM_ID;
+  if (SYNC.ready) return '🟠 동기화 지연 · 가족 코드 ' + ROOM_ID;
+  return '🟡 연결 중 · 가족 코드 ' + ROOM_ID;
+}
+
+/* 상태 -> 테이블 행 */
+function buildRows() {
+  const rid = ROOM_ID;
+  const out = {};
+  SYNC_ORDER.forEach(t => { out[t] = []; });
+
+  out.rooms.push({
+    room_id: rid,
+    app_name: state.appName || '우리 가족 기록장',
+    app_logo: state.appLogo || '',
+    city_name: (state.city && state.city.name) || '대구 침산동',
+    city_lat: Number((state.city && state.city.lat) || 35.8866),
+    city_lon: Number((state.city && state.city.lon) || 128.5902),
+    start_money: Math.round(Number(state.ledger.startMoney) || 0),
+    alarm_enabled: !!state.alarm.enabled,
+    alarm_time: state.alarm.time || '21:30',
+    alarm_last_fired_date: state.alarm.lastFiredDate || null,
+    mission_index: Number(state.missionIndex) || 0,
+    mission_done_date: state.missionDoneDate || null,
+    mission_total_count: Number(state.missionTotalCount) || 0,
+    last_study_reset_date: state.lastStudyResetDate || null
+  });
+
+  (state.members || []).forEach((m, i) => out.members.push({
+    room_id: rid, id: m.id, name: m.name || '구성원', role: m.role || '',
+    avatar: m.avatar || '', mascot: m.mascot || '', position: i
+  }));
+
+  Object.keys(state.todos || {}).forEach(mid => {
+    (state.todos[mid] || []).forEach((t, i) => out.todos.push({
+      room_id: rid, id: t.id, member_id: mid, title: t.title || '', done: !!t.done, position: i
+    }));
+  });
+
+  (state.studies || []).forEach((s, i) => out.studies.push({
+    room_id: rid, id: s.id, title: s.title || '', detail: s.detail || '',
+    reward: Math.round(Number(s.reward) || 0), pinned: !!s.pinned, done: !!s.done, position: i
+  }));
+
+  (state.missions || []).forEach((m, i) => out.missions.push({
+    room_id: rid, id: m.id || ('ms' + (i + 1)), emoji: m.emoji || '', text: m.text || '', position: i
+  }));
+
+  Object.keys(state.ledger.dailyStudyLog || {}).forEach(d => {
+    const info = state.ledger.dailyStudyLog[d] || {};
+    out.study_logs.push({
+      room_id: rid, log_date: d,
+      count: Math.round(Number(info.count) || 0), amount: Math.round(Number(info.amount) || 0)
+    });
+  });
+
+  Object.keys(state.stamps || {}).forEach(d => {
+    if (state.stamps[d]) out.stamps.push({ room_id: rid, stamp_date: d, stamped: true });
+  });
+
+  (state.chat.messages || []).forEach((m, i) => out.chat_messages.push({
+    room_id: rid, id: m.id, sender_id: m.senderId, type: m.type || 'text',
+    text: (m.text === undefined ? null : m.text),
+    audio: m.audio || null,
+    time_label: m.time || '',
+    hearts: Math.round(Number(m.hearts) || 0),
+    seq: Number(m.seq) || (i + 1)
+  }));
+
+  (state.ledger.transactions || []).forEach((t, i) => out.allowance_tx.push({
+    room_id: rid, id: t.id, tx_date: t.date || todayKey(), type: t.type || 'income',
+    amount: Math.round(Number(t.amount) || 0), memo: t.memo || '',
+    seq: Number(t.seq) || (i + 1)
+  }));
+
+  return out;
+}
+
+/* 테이블 행 -> 상태 */
+function applyServerData(data) {
+  const room = (data.rooms || [])[0];
+  if (!room) return false;
+  const prefs = {
+    activeMemberId: state.chat.activeMemberId,
+    soundOn: state.chat.soundOn,
+    deviceLocked: state.chat.deviceLocked
+  };
+  const next = structuredClone(DEFAULT_STATE);
+
+  next.appName = room.app_name || next.appName;
+  next.appLogo = room.app_logo || next.appLogo;
+  next.city = {
+    name: room.city_name || next.city.name,
+    lat: Number(room.city_lat) || next.city.lat,
+    lon: Number(room.city_lon) || next.city.lon
+  };
+  next.alarm = {
+    enabled: !!room.alarm_enabled,
+    time: room.alarm_time || '21:30',
+    lastFiredDate: room.alarm_last_fired_date || null
+  };
+  next.missionIndex = Number(room.mission_index) || 0;
+  next.missionDoneDate = room.mission_done_date || null;
+  next.missionTotalCount = Number(room.mission_total_count) || 0;
+  next.lastStudyResetDate = room.last_study_reset_date || next.lastStudyResetDate;
+
+  next.members = sortByPosition(data.members || []).map(m => ({
+    id: m.id, name: m.name, role: m.role || '', avatar: m.avatar || '', mascot: m.mascot || ''
+  }));
+
+  next.todos = {};
+  (data.todos || []).forEach(t => {
+    (next.todos[t.member_id] = next.todos[t.member_id] || []).push({
+      id: t.id, title: t.title, done: !!t.done, position: t.position
+    });
+  });
+  Object.keys(next.todos).forEach(k => {
+    next.todos[k] = sortByPosition(next.todos[k]).map(t => {
+      const c = { id: t.id, title: t.title, done: !!t.done };
+      return c;
+    });
+  });
+
+  next.studies = sortByPosition(data.studies || []).map(s => ({
+    id: s.id, title: s.title, detail: s.detail || '',
+    reward: Number(s.reward) || 0, pinned: !!s.pinned, done: !!s.done
+  }));
+
+  next.missions = sortByPosition(data.missions || []).map(m => ({
+    id: m.id, emoji: m.emoji || '🎲', text: m.text
+  }));
+  if (!next.missions.length) next.missions = structuredClone(DEFAULT_STATE.missions);
+
+  next.stamps = {};
+  (data.stamps || []).forEach(s => { if (s.stamped !== false) next.stamps[s.stamp_date] = true; });
+
+  next.chat = { ...next.chat, ...prefs, messages: (data.chat_messages || [])
+    .slice()
+    .sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0))
+    .map(m => ({
+      id: m.id, senderId: m.sender_id, type: m.type || 'text',
+      text: (m.text === null ? undefined : m.text),
+      audio: m.audio || undefined,
+      time: m.time_label || '', hearts: Number(m.hearts) || 0, seq: Number(m.seq) || 0
+    }))
+  };
+
+  next.ledger = { startMoney: Number(room.start_money) || 0, dailyStudyLog: {}, transactions: [] };
+  (data.study_logs || []).forEach(l => {
+    next.ledger.dailyStudyLog[l.log_date] = { count: Number(l.count) || 0, amount: Number(l.amount) || 0 };
+  });
+  next.ledger.transactions = (data.allowance_tx || [])
+    .slice()
+    .sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0))
+    .map(t => ({
+      id: t.id, date: t.tx_date, type: t.type,
+      amount: Number(t.amount) || 0, memo: t.memo || '', seq: Number(t.seq) || 0
+    }));
+
+  if (!next.members.some(m => m.id === next.chat.activeMemberId) && next.members[0]) {
+    next.chat.activeMemberId = next.members[0].id;
+  }
+
+  state = next;
+  return true;
+}
+
+function shadowFromRows(data) {
+  const s = emptyShadow();
+  SYNC_ORDER.forEach(t => {
+    (data[t] || []).forEach(row => s[t].set(rowKey(row, SYNC_TABLES[t]), row));
+  });
+  return s;
+}
+
+function makeClient() {
+  if (!window.supabase || typeof window.supabase.createClient !== 'function') return null;
+  try {
+    return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { 'x-room-code': ROOM_ID } },
+      realtime: { params: { eventsPerSecond: 10 } }
+    });
+  } catch (err) {
+    console.warn('[sync] client 만들기 실패', err);
+    return null;
+  }
+}
+
+async function sbFetchAll() {
+  const results = await Promise.all(SYNC_ORDER.map(async (t) => {
+    const { data, error } = await SYNC.client.from(t).select('*').eq('room_id', ROOM_ID);
+    if (error) throw new Error(t + ': ' + error.message);
+    return [t, data || []];
+  }));
+  const out = {};
+  results.forEach(([t, rows]) => { out[t] = rows; });
+  return out;
+}
+
+/* 변경분만 밀어넣기(행 단위 upsert/delete) */
+function schedulePush() {
+  if (!SYNC.ready || !SYNC.client) return;
+  clearTimeout(SYNC.pushTimer);
+  SYNC.pushTimer = setTimeout(() => { pushDiff(); }, 80);
+}
+
+function handlePushError(table, error) {
+  SYNC.failures += 1;
+  console.warn('[sync] push 실패', table, error && error.message);
+  setSyncBadge('warn', '🟠 동기화 지연');
+  SYNC.shadow = emptyShadow();
+  clearTimeout(SYNC.retryTimer);
+  SYNC.retryTimer = setTimeout(() => { pushDiff(); }, Math.min(30000, 2000 * SYNC.failures));
+}
+
+async function pushDiff() {
+  if (!SYNC.ready || !SYNC.client || SYNC.applying || !SYNC.shadow) return;
+  const desired = buildRows();
+  const batches = [];
+  SYNC_ORDER.forEach(t => {
+    const spec = SYNC_TABLES[t];
+    const have = SYNC.shadow[t];
+    const want = new Map();
+    desired[t].forEach(row => want.set(rowKey(row, spec), row));
+    const upserts = [];
+    want.forEach((row, k) => {
+      const prev = have.get(k);
+      if (!prev || !sameRow(prev, row, spec.fields)) {
+        upserts.push(row);
+        have.set(k, Object.assign({}, row));
+      }
+    });
+    const deletes = [];
+    have.forEach((prev, k) => { if (!want.has(k)) deletes.push({ k, prev }); });
+    deletes.forEach(d => have.delete(d.k));
+    if (upserts.length || deletes.length) batches.push({ table: t, spec, upserts, deletes });
+  });
+  if (!batches.length) return;
+  for (const b of batches) {
+    if (b.upserts.length) {
+      const { error } = await SYNC.client.from(b.table).upsert(b.upserts, { onConflict: b.spec.pk.join(',') });
+      if (error) { handlePushError(b.table, error); return; }
+    }
+    for (const d of b.deletes) {
+      let query = SYNC.client.from(b.table).delete();
+      b.spec.pk.forEach(k => { query = query.eq(k, d.prev[k]); });
+      const { error } = await query;
+      if (error) { handlePushError(b.table, error); return; }
+    }
+  }
+  SYNC.failures = 0;
+  if (SYNC.online) setSyncBadge('live');
+}
+
+/* 서버 변경 -> 상태 */
+function applyRowEvent(table, payload) {
+  const ev = payload.eventType;
+  const row = (ev === 'DELETE') ? payload.old : payload.new;
+  if (!row) return;
+  const gone = (ev === 'DELETE');
+
+  if (table === 'rooms') {
+    if (gone) return;
+    state.appName = row.app_name || state.appName;
+    state.appLogo = row.app_logo || state.appLogo;
+    state.city = {
+      name: row.city_name || state.city.name,
+      lat: Number(row.city_lat) || state.city.lat,
+      lon: Number(row.city_lon) || state.city.lon
+    };
+    state.ledger.startMoney = Number(row.start_money) || 0;
+    state.alarm = {
+      enabled: !!row.alarm_enabled,
+      time: row.alarm_time || '21:30',
+      lastFiredDate: row.alarm_last_fired_date || null
+    };
+    state.missionIndex = Number(row.mission_index) || 0;
+    state.missionDoneDate = row.mission_done_date || null;
+    state.missionTotalCount = Number(row.mission_total_count) || 0;
+    state.lastStudyResetDate = row.last_study_reset_date || state.lastStudyResetDate;
+    return;
+  }
+
+  if (table === 'members') {
+    const list = (state.members || []).filter(m => m.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, name: row.name, role: row.role || '', avatar: row.avatar || '',
+      mascot: row.mascot || '', position: row.position
+    });
+    state.members = sortByPosition(list).map(m => ({
+      id: m.id, name: m.name, role: m.role || '', avatar: m.avatar || '', mascot: m.mascot || ''
+    }));
+    if (!state.members.some(m => m.id === state.chat.activeMemberId) && state.members[0]) {
+      state.chat.activeMemberId = state.members[0].id;
+    }
+    return;
+  }
+
+  if (table === 'todos') {
+    if (gone && !row.member_id) {
+      Object.keys(state.todos || {}).forEach(mid => {
+        state.todos[mid] = (state.todos[mid] || []).filter(t => t.id !== row.id);
+      });
+      return;
+    }
+    const mid = row.member_id;
+    const list = (state.todos[mid] || []).filter(t => t.id !== row.id);
+    if (!gone) list.push({ id: row.id, title: row.title, done: !!row.done, position: row.position });
+    state.todos[mid] = sortByPosition(list).map(t => ({ id: t.id, title: t.title, done: !!t.done }));
+    return;
+  }
+
+  if (table === 'studies') {
+    const list = (state.studies || []).filter(s => s.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, title: row.title, detail: row.detail || '',
+      reward: Number(row.reward) || 0, pinned: !!row.pinned, done: !!row.done, position: row.position
+    });
+    state.studies = sortByPosition(list).map(s => ({
+      id: s.id, title: s.title, detail: s.detail || '',
+      reward: Number(s.reward) || 0, pinned: !!s.pinned, done: !!s.done
+    }));
+    return;
+  }
+
+  if (table === 'missions') {
+    const list = (state.missions || []).filter(m => m.id !== row.id);
+    if (!gone) list.push({ id: row.id, emoji: row.emoji || '🎲', text: row.text, position: row.position });
+    state.missions = sortByPosition(list).map(m => ({ id: m.id, emoji: m.emoji || '🎲', text: m.text }));
+    if (!state.missions.length) state.missions = structuredClone(DEFAULT_STATE.missions);
+    return;
+  }
+
+  if (table === 'study_logs') {
+    if (gone) delete state.ledger.dailyStudyLog[row.log_date];
+    else state.ledger.dailyStudyLog[row.log_date] = {
+      count: Number(row.count) || 0, amount: Number(row.amount) || 0
+    };
+    return;
+  }
+
+  if (table === 'stamps') {
+    if (gone) delete state.stamps[row.stamp_date];
+    else if (row.stamped !== false) state.stamps[row.stamp_date] = true;
+    return;
+  }
+
+  if (table === 'chat_messages') {
+    const list = (state.chat.messages || []).filter(m => m.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, senderId: row.sender_id, type: row.type || 'text',
+      text: (row.text === null ? undefined : row.text),
+      audio: row.audio || undefined,
+      time: row.time_label || '', hearts: Number(row.hearts) || 0, seq: Number(row.seq) || 0
+    });
+    state.chat.messages = list.sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0));
+    return;
+  }
+
+  if (table === 'allowance_tx') {
+    const list = (state.ledger.transactions || []).filter(t => t.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, date: row.tx_date, type: row.type,
+      amount: Number(row.amount) || 0, memo: row.memo || '', seq: Number(row.seq) || 0
+    });
+    state.ledger.transactions = list.sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0));
+    return;
+  }
+}
+
+function handleRealtime(table, payload) {
+  const spec = SYNC_TABLES[table];
+  const row = (payload.eventType === 'DELETE') ? payload.old : payload.new;
+  if (!row || !SYNC.shadow) return;
+  const key = rowKey(row, spec);
+  if (payload.eventType === 'DELETE') SYNC.shadow[table].delete(key);
+  else SYNC.shadow[table].set(key, row);
+
+  SYNC.applying = true;
+  try {
+    applyRowEvent(table, payload);
+    renderAll();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (err) {
+    console.warn('[sync] realtime 적용 실패', table, err);
+  } finally {
+    SYNC.applying = false;
+  }
+}
+
+function setupRealtime() {
+  if (!SYNC.client) return;
+  if (SYNC.channel) {
+    try { SYNC.client.removeChannel(SYNC.channel); } catch (e) {}
+    SYNC.channel = null;
+  }
+  const channel = SYNC.client.channel('family-dashboard-' + ROOM_ID);
+  SYNC_ORDER.forEach(t => {
+    channel.on('postgres_changes', {
+      event: '*', schema: 'public', table: t, filter: 'room_id=eq.' + ROOM_ID
+    }, payload => handleRealtime(t, payload));
+  });
+  channel.subscribe((status) => {
+    if (status === 'SUBSCRIBED') {
+      SYNC.online = true;
+      setSyncBadge('live');
+    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+      SYNC.online = false;
+      setSyncBadge('offline', '⚪ 연결 끊김');
+      clearTimeout(SYNC.retryTimer);
+      SYNC.retryTimer = setTimeout(() => { fullSync(); }, 5000);
+    }
+  });
+  SYNC.channel = channel;
+}
+
+async function seedRoom() {
+  const rows = buildRows();
+  for (const t of SYNC_ORDER) {
+    if (!rows[t].length) continue;
+    const { error } = await SYNC.client.from(t).upsert(rows[t], { onConflict: SYNC_TABLES[t].pk.join(',') });
+    if (error) throw new Error(t + ': ' + error.message);
+  }
+  const data = await sbFetchAll();
+  SYNC.applying = true;
+  try {
+    if (!applyServerData(data)) throw new Error('seed 확인 실패');
+    SYNC.shadow = shadowFromRows(data);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } finally {
+    SYNC.applying = false;
+  }
+  SYNC.ready = true;
+  renderAll();
+  loadWeather();
+}
+
+async function fullSync() {
+  if (!SYNC.client) return;
+  try {
+    const data = await sbFetchAll();
+    if (!(data.rooms || []).length) { await seedRoom(); return; }
+    SYNC.applying = true;
+    try {
+      applyServerData(data);
+      SYNC.shadow = shadowFromRows(data);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } finally {
+      SYNC.applying = false;
+    }
+    SYNC.ready = true;
+    SYNC.online = true;
+    renderAll();
+    loadWeather();
+    setSyncBadge('live');
+    if (!SYNC.channel) setupRealtime();
+  } catch (err) {
+    console.warn('[sync] fullSync 실패', err);
+    SYNC.online = false;
+    setSyncBadge('offline', '⚪ 연결 대기');
+    clearTimeout(SYNC.retryTimer);
+    SYNC.retryTimer = setTimeout(() => { fullSync(); }, 8000);
+  }
+}
+
+async function initSync() {
+  SYNC.shadow = emptyShadow();
+  SYNC.client = makeClient();
+  if (!SYNC.client) {
+    setSyncBadge('offline', '⚪ 로컬 저장 모드');
+    return;
+  }
+  setSyncBadge('connecting', '🟡 연결 중');
+  try {
+    const data = await sbFetchAll();
+    if (!(data.rooms || []).length) {
+      await seedRoom();
+    } else {
+      SYNC.applying = true;
+      try {
+        applyServerData(data);
+        SYNC.shadow = shadowFromRows(data);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } finally {
+        SYNC.applying = false;
+      }
+      SYNC.ready = true;
+      renderAll();
+      loadWeather();
+    }
+    SYNC.online = true;
+    setSyncBadge('live');
+    setupRealtime();
+  } catch (err) {
+    console.warn('[sync] 연결 실패, 로컬 캐시로 계속', err);
+    setSyncBadge('offline', '⚪ 오프라인 저장');
+    clearTimeout(SYNC.retryTimer);
+    SYNC.retryTimer = setTimeout(() => { initSync(); }, 10000);
+  }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && SYNC.client) fullSync();
+});
+window.addEventListener('online', () => {
+  if (SYNC.client) fullSync();
+});
+
 function renderAll() {
   dailyAutoReset();
   renderDate();
@@ -1905,6 +2572,7 @@ function renderAll() {
 
 renderAll();
 loadWeather();
+initSync();
 </script>
 </body>
 </html>
