@@ -1976,15 +1976,15 @@ function normalizeRoomCode(input) {
 const ROOM_ID = normalizeRoomCode(localStorage.getItem(ROOM_STORAGE_KEY)) || DEFAULT_ROOM_ID;
 
 const SYNC_TABLES = {
-  rooms:         { pk: ['room_id'], fields: ['room_id','app_name','app_logo','city_name','city_lat','city_lon','start_money','alarm_enabled','alarm_time','alarm_last_fired_date','mission_index','mission_done_date','mission_total_count','last_study_reset_date'] },
-  members:       { pk: ['room_id','id'], fields: ['room_id','id','name','role','avatar','mascot','position'] },
-  todos:         { pk: ['room_id','id'], fields: ['room_id','id','member_id','title','done','position'] },
-  studies:       { pk: ['room_id','id'], fields: ['room_id','id','title','detail','reward','pinned','done','position'] },
-  missions:      { pk: ['room_id','id'], fields: ['room_id','id','emoji','text','position'] },
-  study_logs:    { pk: ['room_id','log_date'], fields: ['room_id','log_date','count','amount'] },
-  stamps:        { pk: ['room_id','stamp_date'], fields: ['room_id','stamp_date','stamped'] },
-  chat_messages: { pk: ['room_id','id'], fields: ['room_id','id','sender_id','type','text','audio','time_label','hearts','seq'] },
-  allowance_tx:  { pk: ['room_id','id'], fields: ['room_id','id','tx_date','type','amount','memo','seq'] }
+  rooms:         { table: 'family_rooms',         pk: ['room_id'], fields: ['room_id','app_name','app_logo','city_name','city_lat','city_lon','start_money','alarm_enabled','alarm_time','alarm_last_fired_date','mission_index','mission_done_date','mission_total_count','last_study_reset_date'] },
+  members:       { table: 'family_members',       pk: ['room_id','id'], fields: ['room_id','id','name','role','avatar','mascot','position'] },
+  todos:         { table: 'family_todos',         pk: ['room_id','id'], fields: ['room_id','id','member_id','title','done','position'] },
+  studies:       { table: 'family_studies',       pk: ['room_id','id'], fields: ['room_id','id','title','detail','reward','pinned','done','position'] },
+  missions:      { table: 'family_missions',      pk: ['room_id','id'], fields: ['room_id','id','emoji','text','position'] },
+  study_logs:    { table: 'family_study_logs',    pk: ['room_id','log_date'], fields: ['room_id','log_date','count','amount'] },
+  stamps:        { table: 'family_stamps',        pk: ['room_id','stamp_date'], fields: ['room_id','stamp_date','stamped'] },
+  chat_messages: { table: 'family_chat_messages', pk: ['room_id','id'], fields: ['room_id','id','sender_id','type','text','audio','time_label','hearts','seq'] },
+  allowance_tx:  { table: 'family_allowance_tx',  pk: ['room_id','id'], fields: ['room_id','id','tx_date','type','amount','memo','seq'] }
 };
 const SYNC_ORDER = ['rooms','members','todos','studies','missions','study_logs','stamps','chat_messages','allowance_tx'];
 
@@ -2239,8 +2239,8 @@ function makeClient() {
 
 async function sbFetchAll() {
   const results = await Promise.all(SYNC_ORDER.map(async (t) => {
-    const { data, error } = await SYNC.client.from(t).select('*').eq('room_id', ROOM_ID);
-    if (error) throw new Error(t + ': ' + error.message);
+    const { data, error } = await SYNC.client.from(SYNC_TABLES[t].table).select('*').eq('room_id', ROOM_ID);
+    if (error) throw new Error(SYNC_TABLES[t].table + ': ' + error.message);
     return [t, data || []];
   }));
   const out = {};
@@ -2284,7 +2284,7 @@ async function pushDiff() {
     const deletes = [];
     have.forEach((prev, k) => { if (!want.has(k)) deletes.push({ k, prev }); });
     deletes.forEach(d => have.delete(d.k));
-    if (upserts.length || deletes.length) batches.push({ table: t, spec, upserts, deletes });
+    if (upserts.length || deletes.length) batches.push({ table: SYNC_TABLES[t].table, spec, upserts, deletes });
   });
   if (!batches.length) return;
   for (const b of batches) {
@@ -2448,7 +2448,7 @@ function setupRealtime() {
   const channel = SYNC.client.channel('family-dashboard-' + ROOM_ID);
   SYNC_ORDER.forEach(t => {
     channel.on('postgres_changes', {
-      event: '*', schema: 'public', table: t, filter: 'room_id=eq.' + ROOM_ID
+      event: '*', schema: 'public', table: SYNC_TABLES[t].table, filter: 'room_id=eq.' + ROOM_ID
     }, payload => handleRealtime(t, payload));
   });
   channel.subscribe((status) => {
@@ -2469,8 +2469,8 @@ async function seedRoom() {
   const rows = buildRows();
   for (const t of SYNC_ORDER) {
     if (!rows[t].length) continue;
-    const { error } = await SYNC.client.from(t).upsert(rows[t], { onConflict: SYNC_TABLES[t].pk.join(',') });
-    if (error) throw new Error(t + ': ' + error.message);
+    const { error } = await SYNC.client.from(SYNC_TABLES[t].table).upsert(rows[t], { onConflict: SYNC_TABLES[t].pk.join(',') });
+    if (error) throw new Error(SYNC_TABLES[t].table + ': ' + error.message);
   }
   const data = await sbFetchAll();
   SYNC.applying = true;
@@ -2516,7 +2516,7 @@ async function fullSync() {
 
 async function initSync() {
   SYNC.shadow = emptyShadow();
-  SYNC.client = makeClient();
+  if (!SYNC.client) SYNC.client = makeClient();
   if (!SYNC.client) {
     setSyncBadge('offline', '⚪ 로컬 저장 모드');
     return;
