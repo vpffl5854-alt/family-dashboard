@@ -204,6 +204,7 @@
   .badge-green { background: #E6F7ED; color: #276749; border-color: #B8E6C8; }
   .badge-blue { background: #EBF5FF; color: #2B6CB0; border-color: #C6E0FA; }
   .badge-gray { background: #F5F2EA; color: #6B6257; border-color: #E5DEC9; }
+  .badge-amber { background: #FFF1DA; color: #B45309; border-color: #F7C98B; }
 
   /* Weather */
   .weather-card {
@@ -968,6 +969,55 @@
   .due-pill.late { background: #FFF0F0; color: #C53030; border-color: #F3B7B7; }
   .due-pill.today { background: #FFE0E0; color: #C53030; border-color: #F19999; }
   .src-pickle { font-size: 10.5px; font-weight: 800; color: #6B46C1; background: #F3EEFF; border: 1px solid #D6C6FF; border-radius: 8px; padding: 1px 6px; }
+
+  /* 💡 집 조명 (Smart Life) */
+  .light-summary-inner { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+  .light-summary-icon { font-size: 22px; line-height: 1; }
+  .light-summary-title { font-size: 13px; font-weight: 800; }
+  .light-summary-text { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+  .light-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .light-card {
+    background: #FFFCF4;
+    border: 1.5px solid #EFE7CF;
+    border-radius: 18px;
+    padding: 11px 11px 9px;
+  }
+  .light-card.offline { background: #FBF8F0; border-style: dashed; }
+  .light-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+  .light-name { font-size: 13px; font-weight: 800; letter-spacing: -0.2px; }
+  .light-state {
+    font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 8px; white-space: nowrap;
+    background: #F3EEE2; color: var(--muted); border: 1px solid #E5DCC7;
+  }
+  .light-state.on { background: #FFF1DA; color: #B45309; border-color: #F7C98B; }
+  .light-state.off { background: #F6F2E9; color: #A2957F; }
+  .light-state.offline { background: #F5F1E8; color: #A79A86; }
+  .light-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .light-btn {
+    flex: 1 1 62px; min-width: 62px; border-radius: 14px; border: 1.5px solid #E6DCC4;
+    background: #FFFDF6; color: var(--muted); padding: 8px 6px; font-family: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .light-btn:active { transform: scale(0.95); }
+  .light-btn .lb-name { font-size: 11.5px; font-weight: 800; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .light-btn .lb-state { font-size: 9.5px; font-weight: 900; letter-spacing: .6px; opacity: .7; }
+  .light-btn.on {
+    background: linear-gradient(180deg, #FFDCA6 0%, #F8B76C 100%);
+    border-color: #E9A24F; color: #5C3A12;
+    box-shadow: 0 4px 10px rgba(233, 162, 79, 0.28);
+  }
+  .light-btn.on .lb-state { opacity: .85; }
+  .light-btn[disabled] { opacity: .5; }
+  .light-btn.saving { opacity: .6; }
+  .light-foot { margin-top: 7px; display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 10.5px; font-weight: 700; color: var(--muted); min-height: 16px; }
+  .light-rename { border: none; background: none; color: #A0917A; font-family: inherit; font-size: 10.5px; font-weight: 800; padding: 1px 2px; }
+  .light-sensor { font-size: 11.5px; font-weight: 800; color: var(--muted); }
+  .light-hint { margin: 10px 0 0; font-size: 11px; line-height: 1.55; color: var(--muted); text-align: center; }
+  .light-empty { text-align: center; font-size: 12.5px; font-weight: 700; color: var(--muted); line-height: 1.7; padding: 16px 6px; }
+  .light-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .light-row .light-row-name { flex: 1 1 auto; font-size: 12.5px; font-weight: 800; }
+  .light-row input { flex: 1 1 120px; min-width: 0; padding: 7px 9px; border-radius: 11px; border: 1.5px solid var(--border); font-family: inherit; font-size: 12.5px; background: #FFFDF8; }
 </style>
 </head>
 <body>
@@ -995,6 +1045,7 @@
   <nav class="nav-tabs" id="navTabs">
     <button class="nav-tab active" data-tab="all" onclick="switchTab('all')">전체</button>
     <button class="nav-tab" data-tab="home" onclick="switchTab('home')">🏠 홈</button>
+    <button class="nav-tab" data-tab="lights" onclick="switchTab('lights')">💡 조명</button>
     <button class="nav-tab" data-tab="study" onclick="switchTab('study')">📚 공부·숙제</button>
     <button class="nav-tab" data-tab="schedule" onclick="switchTab('schedule')">📅 일정·D-Day</button>
     <button class="nav-tab" data-tab="meal" onclick="switchTab('meal')">🍱 급식</button>
@@ -1020,6 +1071,18 @@
       </div>
       <div class="outfit-line" id="outfitLine">👕 오늘 옷차림을 준비하고 있어요</div>
       <div class="forecast-strip" id="forecastStrip"></div>
+    </div>
+
+    <!-- 집 조명 요약 (Smart Life) -->
+    <div class="card" id="lightSummaryCard" style="display:none;">
+      <div class="light-summary-inner" onclick="switchTab('lights')">
+        <span class="light-summary-icon" id="lightSummaryIcon">💡</span>
+        <div style="flex:1; min-width:0;">
+          <div class="light-summary-title">집 조명</div>
+          <div class="light-summary-text" id="lightSummaryText">불러오는 중...</div>
+        </div>
+        <span class="badge" id="lightSummaryBadge">보기</span>
+      </div>
     </div>
 
     <!-- Family Members Summary -->
@@ -1059,6 +1122,23 @@
 
     <!-- Member Todo Lists -->
     <div id="todoCardsWrap"></div>
+  </section>
+
+  <!-- LIGHTS SECTION (Smart Life) -->
+  <section data-section="lights">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">💡 집 조명</h2>
+        <span class="badge badge-gray" id="lightStatusBadge">불러오는 중...</span>
+      </div>
+      <p class="card-desc" id="lightDesc">Smart Life에 연결된 우리 집 조명을 여기서 바로 켜고 끄고, 스위치 이름도 바꿔요.</p>
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn btn-sm" id="lightRefreshBtn" onclick="loadLights(true)">🔄 새로고침</button>
+        <button class="btn btn-sm btn-amber" id="lightAllOffBtn" onclick="confirmAllLightsOff()">🌙 전체 소등</button>
+      </div>
+      <div id="lightDevices" class="light-grid"></div>
+      <p class="light-hint">카드 아래 “✏️ 이름”을 누르면 스위치 별명을 바꿀 수 있고, 바뀐 이름은 가족 모두 같은 화면으로 봐요.</p>
+    </div>
   </section>
 
   <!-- STUDY & TIMER SECTION -->
@@ -1410,6 +1490,7 @@ function switchTab(tab) {
   document.querySelectorAll('section[data-section]').forEach(sec => {
     sec.classList.toggle('hidden', tab !== 'all' && sec.dataset.section !== tab);
   });
+  if (tab === 'lights') ensureLights(false);
 }
 
 /* Weather */
@@ -3720,6 +3801,10 @@ function handleRealtime(table, payload) {
   SYNC.applying = true;
   try {
     applyRowEvent(table, payload);
+    if (table === 'rooms' && row && row.light_labels) {
+      LIGHTS.labels = row.light_labels || {};
+      renderLights();
+    }
     renderAll();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (err) {
@@ -3850,6 +3935,301 @@ window.addEventListener('online', () => {
   if (SYNC.client) fullSync();
 });
 
+/* ==================================================================
+   💡 집 조명 (Smart Life / Tuya)
+   - 상태·제어는 Supabase Edge Function 'tuya-lights'가 대신 처리한다
+     (Smart Life 토큰은 서버 DB에만 있고 브라우저로 내려오지 않는다)
+   - 스위치 별명은 family_rooms.light_labels에 저장되어 가족 모두가 함께 본다
+   ================================================================== */
+const LIGHTS_API = SUPABASE_URL + '/functions/v1/tuya-lights';
+const LIGHTS = {
+  loading: false, loaded: false, connected: null,
+  devices: [], labels: {}, error: '', lastFetch: 0
+};
+const LIGHTS_SAVING = new Set();
+const LIGHT_ORDER = ['거실', '주방', '큰방', '소떠기 방♡', '미니', '지프등', '차고지 등'];
+const LIGHT_EMOJI = [
+  ['거실', '🛋️'], ['주방', '🍳'], ['큰방', '🛏️'], ['소떠기', '🧸'],
+  ['미니', '🔌'], ['지프', '🚙'], ['차고', '🚗'], ['리모컨', '🎛️']
+];
+
+function lightEmoji(name) {
+  const hit = LIGHT_EMOJI.find(([k]) => String(name).includes(k));
+  return hit ? hit[1] : '💡';
+}
+
+function lightDefaultName(device, code) {
+  const idx = device.switches.findIndex(s => s.code === code) + 1;
+  if (device.switches.length === 1) return device.category === 'cz' ? '전원' : '전등';
+  return idx + '구';
+}
+
+function lightLabel(device, code) {
+  return LIGHTS.labels[device.id + '.' + code] || lightDefaultName(device, code);
+}
+
+function lightRank(d) {
+  const i = LIGHT_ORDER.indexOf(String(d.name).trim());
+  return i < 0 ? 99 : i;
+}
+
+async function lightsApi(payload) {
+  const res = await fetch(LIGHTS_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      'x-room-code': ROOM_ID
+    },
+    body: JSON.stringify(payload)
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { data = null; }
+  if (!res.ok && !(data && data.devices)) {
+    throw new Error((data && data.error) || ('HTTP ' + res.status));
+  }
+  return data || {};
+}
+
+function applyLightsPayload(res) {
+  if (!res) return;
+  LIGHTS.connected = res.connected === false ? false : true;
+  LIGHTS.loaded = true;
+  if (Array.isArray(res.devices)) LIGHTS.devices = res.devices;
+  if (res.labels && typeof res.labels === 'object') LIGHTS.labels = res.labels;
+}
+
+async function loadLights(manual) {
+  if (LIGHTS.loading) return;
+  LIGHTS.loading = true;
+  if (!LIGHTS.loaded) renderLights();
+  try {
+    const res = await lightsApi({ action: 'list' });
+    if (res.error) throw new Error(res.error);
+    applyLightsPayload(res);
+    LIGHTS.error = '';
+    LIGHTS.lastFetch = Date.now();
+  } catch (err) {
+    LIGHTS.error = String((err && err.message) || err);
+    LIGHTS.loaded = true;
+    console.warn('[lights] 상태 조회 실패', err);
+    if (manual) showCoinToast('⚠️ 조명 상태를 못 불러왔어요');
+  } finally {
+    LIGHTS.loading = false;
+    renderLights();
+  }
+}
+
+function ensureLights(force) {
+  if (LIGHTS.loading) return;
+  if (!force && LIGHTS.loaded && Date.now() - LIGHTS.lastFetch < 20000) return;
+  loadLights(!!force);
+}
+
+async function toggleLight(deviceId, code) {
+  const dev = LIGHTS.devices.find(d => d.id === deviceId);
+  if (!dev || !dev.online) return;
+  const sw = dev.switches.find(s => s.code === code);
+  if (!sw) return;
+  const key = deviceId + '.' + code;
+  if (LIGHTS_SAVING.has(key)) return;
+
+  const before = sw.on;
+  const next = !before;
+  LIGHTS_SAVING.add(key);
+  sw.on = next;               // 낙관적 UI
+  renderLights();
+  try {
+    const res = await lightsApi({ action: 'command', device_id: deviceId, code: code, value: next });
+    if (res.error) throw new Error(res.error);
+    applyLightsPayload(res);
+    LIGHTS.lastFetch = Date.now();
+  } catch (err) {
+    sw.on = before;           // 실패하면 되돌림
+    showCoinToast('⚠️ 조명 제어에 실패했어요');
+    console.warn('[lights] command 실패', err);
+  } finally {
+    LIGHTS_SAVING.delete(key);
+    renderLights();
+  }
+}
+
+function openLightLabels(deviceId) {
+  const dev = LIGHTS.devices.find(d => d.id === deviceId);
+  if (!dev || !dev.switches.length) return;
+  const rows = dev.switches.map((s, i) => {
+    const key = dev.id + '.' + s.code;
+    const val = LIGHTS.labels[key] || '';
+    const def = lightDefaultName(dev, s.code);
+    return `<div class="light-row">
+      <span class="light-row-name">${escapeHtml(def)}</span>
+      <input id="lightLabelInput-${i}" value="${escapeHtml(val)}" placeholder="${escapeHtml(def)}" maxlength="20" />
+      <button class="btn btn-sm" onclick="saveLightLabel('${dev.id}','${s.code}', document.getElementById('lightLabelInput-${i}').value)">저장</button>
+    </div>`;
+  }).join('');
+  openModal(`
+    <h2 class="card-title" style="margin-bottom:6px;">✏️ ${escapeHtml(dev.name)} 이름 바꾸기</h2>
+    <p class="card-desc">비우고 저장하면 기본 이름으로 돌아가요. 바뀐 이름은 가족 모두 같이 봐요.</p>
+    ${rows}
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn btn-full" onclick="closeModal()">닫기</button>
+    </div>
+  `);
+}
+
+async function saveLightLabel(deviceId, code, value) {
+  const label = String(value || '').trim().slice(0, 20);
+  try {
+    const res = await lightsApi({ action: 'save_label', device_id: deviceId, code: code, label: label });
+    if (res.error) throw new Error(res.error);
+    if (res.labels) LIGHTS.labels = res.labels;
+    closeModal();
+    renderLights();
+    showCoinToast(label ? '이름을 바꿨어요' : '기본 이름으로 돌아갔어요');
+  } catch (err) {
+    showCoinToast('⚠️ 이름 저장에 실패했어요');
+    console.warn('[lights] label 저장 실패', err);
+  }
+}
+
+function confirmAllLightsOff() {
+  const onList = [];
+  LIGHTS.devices.forEach(d => {
+    if (!d.online) return;
+    d.switches.filter(s => s.on).forEach(s => onList.push(d.name + ' ' + lightLabel(d, s.code)));
+  });
+  if (!onList.length) { showCoinToast('이미 모든 조명이 꺼져 있어요'); return; }
+  if (!confirm(`켜져 있는 조명 ${onList.length}개를 모두 끌까요?\n\n· ${onList.join('\n· ')}`)) return;
+  runAllLightsOff();
+}
+
+async function runAllLightsOff() {
+  const btn = document.getElementById('lightAllOffBtn');
+  if (btn) btn.disabled = true;
+  try {
+    const res = await lightsApi({ action: 'all_off' });
+    if (res.error) throw new Error(res.error);
+    applyLightsPayload(res);
+    LIGHTS.lastFetch = Date.now();
+    showCoinToast(`🌙 조명 ${res.changed ?? 0}개를 껐어요`);
+  } catch (err) {
+    showCoinToast('⚠️ 전체 소등에 실패했어요');
+    console.warn('[lights] all_off 실패', err);
+  } finally {
+    if (btn) btn.disabled = false;
+    renderLights();
+  }
+}
+
+function renderLights() {
+  const grid = document.getElementById('lightDevices');
+  const badge = document.getElementById('lightStatusBadge');
+  if (!grid || !badge) return;
+
+  const desc = document.getElementById('lightDesc');
+  const refreshBtn = document.getElementById('lightRefreshBtn');
+  const allOffBtn = document.getElementById('lightAllOffBtn');
+  const summaryCard = document.getElementById('lightSummaryCard');
+  const summaryText = document.getElementById('lightSummaryText');
+  const summaryBadge = document.getElementById('lightSummaryBadge');
+  const summaryIcon = document.getElementById('lightSummaryIcon');
+
+  const devices = LIGHTS.devices.slice().sort((a, b) => lightRank(a) - lightRank(b));
+  const onlineCount = devices.filter(d => d.online).length;
+  const onCount = devices.reduce((n, d) => n + (d.online ? d.switches.filter(s => s.on).length : 0), 0);
+  const unconnected = LIGHTS.connected === false;
+
+  if (refreshBtn) refreshBtn.disabled = LIGHTS.loading || unconnected;
+  if (allOffBtn) allOffBtn.disabled = LIGHTS.loading || unconnected || onCount === 0;
+
+  if (summaryCard) summaryCard.style.display = unconnected ? 'none' : 'block';
+  if (summaryText) {
+    if (!LIGHTS.loaded) summaryText.textContent = '불러오는 중...';
+    else if (LIGHTS.error) summaryText.textContent = '상태를 못 불러왔어요 · 눌러서 다시 시도';
+    else if (!onCount) summaryText.textContent = '모두 꺼져 있어요';
+    else summaryText.textContent = `${onCount}개 켜져 있어요`;
+  }
+  if (summaryBadge) {
+    summaryBadge.className = 'badge ' + (onCount ? 'badge-amber' : 'badge-gray');
+    summaryBadge.textContent = onCount ? '💡 켜짐' : 'OFF';
+  }
+  if (summaryIcon) summaryIcon.textContent = onCount ? '💡' : '🌙';
+
+  if (unconnected) {
+    badge.className = 'badge badge-gray';
+    badge.textContent = '미연결';
+    if (desc) desc.textContent = 'Smart Life 조명이 연결된 방에서만 쓸 수 있어요.';
+    grid.innerHTML = `<div class="light-empty" style="grid-column:1/-1;">이 방(<b>${escapeHtml(ROOM_ID)}</b>)에는 Smart Life가 연결돼 있지 않아요.<br>가족 기록장 기본 방(<b>our-family</b>)에서 바로 쓸 수 있어요.</div>`;
+    return;
+  }
+
+  if (!LIGHTS.loaded) {
+    badge.className = 'badge badge-gray';
+    badge.textContent = '불러오는 중...';
+    grid.innerHTML = `<div class="light-empty" style="grid-column:1/-1;">집 조명 상태를 확인하고 있어요</div>`;
+    return;
+  }
+
+  if (LIGHTS.error) {
+    badge.className = 'badge badge-gray';
+    badge.textContent = '연결 지연';
+    grid.innerHTML = `<div class="light-empty" style="grid-column:1/-1;">조명 상태를 못 불러왔어요.<br>${escapeHtml(LIGHTS.error)}<br><br>“새로고침”을 눌러 다시 시도해 주세요.</div>`;
+    return;
+  }
+
+  badge.className = 'badge ' + (onCount ? 'badge-amber' : 'badge-gray');
+  badge.textContent = onCount ? `${onCount}개 켜짐` : '모두 꺼짐';
+  if (desc) desc.textContent = `Smart Life 기기 ${devices.length}개 · ${onlineCount}개 온라인. 켜고 끄면 바로 반영돼요.`;
+
+  if (!devices.length) {
+    grid.innerHTML = `<div class="light-empty" style="grid-column:1/-1;">집에 등록된 Smart Life 기기를 찾지 못했어요.</div>`;
+    return;
+  }
+
+  grid.innerHTML = devices.map(d => {
+    const emoji = lightEmoji(d.name);
+    const anyOn = d.online && d.switches.some(s => s.on);
+    const stateCls = !d.online ? 'offline' : (anyOn ? 'on' : 'off');
+    const stateText = !d.online ? '오프라인' : (anyOn ? '켜짐' : '꺼짐');
+    const chips = d.switches.map(s => {
+      const key = d.id + '.' + s.code;
+      const saving = LIGHTS_SAVING.has(key);
+      return `<button class="light-btn ${s.on ? 'on' : ''} ${saving ? 'saving' : ''}" ${d.online ? '' : 'disabled'} onclick="toggleLight('${d.id}','${s.code}')">
+        <span class="lb-name">${escapeHtml(lightLabel(d, s.code))}</span>
+        <span class="lb-state">${s.on ? 'ON' : 'OFF'}</span>
+      </button>`;
+    }).join('');
+    const sensor = d.switches.length ? '' : `<div class="light-sensor">${d.temperature != null ? `🌡️ ${d.temperature}°C` : ''}${d.humidity != null ? ` · 💧 ${d.humidity}%` : ''}${d.temperature == null && d.humidity == null ? '제어 채널 없음' : ''}</div>`;
+    const foot = d.category === 'cz' && d.online
+      ? `지금 ${d.power_w ?? 0}W`
+      : (d.online ? (d.switches.length ? `${d.switches.length}구 스위치` : '참고 센서') : '기기 전원을 확인해 주세요');
+    return `<div class="light-card ${d.online ? '' : 'offline'}">
+      <div class="light-head">
+        <span class="light-name">${emoji} ${escapeHtml(d.name)}</span>
+        <span class="light-state ${stateCls}">${stateText}</span>
+      </div>
+      <div class="light-btns">${chips}${sensor}</div>
+      <div class="light-foot">
+        <span>${foot}</span>
+        ${d.switches.length ? `<button class="light-rename" onclick="openLightLabels('${d.id}')">✏️ 이름</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* 조명 상태는 화면에 보일 때만 1분 간격으로 조용히 새로 읽는다 */
+setInterval(() => {
+  if (document.visibilityState !== 'visible') return;
+  if (currentTab !== 'lights' && currentTab !== 'all') return;
+  if (!LIGHTS.loaded || LIGHTS.error) return;
+  loadLights(false);
+}, 60000);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && LIGHTS.loaded) loadLights(false);
+});
+
 function renderAll() {
   dailyAutoReset();
   renderDate();
@@ -3865,12 +4245,14 @@ function renderAll() {
   renderHomeworks();
   renderGrowth();
   renderMeals();
+  renderLights();
 }
 
 renderAll();
 loadWeather();
 loadMeals();
 initSync();
+ensureLights(false);
 </script>
 </body>
 </html>

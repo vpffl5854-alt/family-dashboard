@@ -14,7 +14,8 @@
 3. **학교 급식** — 나이스 교육정보 Open API(키 없음, CORS 허용). 학교 검색 → 저장(가족 공유), 오늘·이번 주 식단, 알레르기 번호 토글
 4. **키 · 몸무게 · BMI 성장 기록** — BMI 자동 계산, 최신 수치 카드, 인라인 SVG 추이 그래프(키/몸무게/BMI), 구성원 필터
 5. **학원·학교 숙제** — 과목·마감일(D-day 배지)·담당·완료 체크, 완료 시 도장 연동
-6. 기존 기능: 오늘의 미션 · 할 일 · 도장판 · 공부 타이머 · 기기 잠금 · 가족 채팅(스티커/15초 음성) · 용돈기입장 · 설정/공유 코드
+6. **💡 집 조명 (Smart Life · Tuya)** — 거실 3구·주방 2구·큰방·소떠기 방♡·스마트플러그(미니) ON/OFF, 소비전력 표시, 오프라인 기기 구분, 스위치 이름(별명) 가족 공유, `전체 소등`
+7. 기존 기능: 오늘의 미션 · 할 일 · 도장판 · 공부 타이머 · 기기 잠금 · 가족 채팅(스티커/15초 음성) · 용돈기입장 · 설정/공유 코드
 
 ## 데이터 동기화 (Supabase)
 
@@ -29,6 +30,18 @@
 - Realtime(`postgres_changes`) 구독으로 다른 기기의 변경이 즉시 화면에 반영됩니다. `localStorage`는 캐시·오프라인 폴백으로만 씁니다.
 - 가족 공유 코드(기본 `our-family`)가 같으면 같은 기록장을 함께 씁니다. 설정 모달에서 코드를 확인·변경할 수 있습니다.
 - 음성 메시지는 15초 안쪽(약 150KB 이하)으로 제한해 DB·Realtime 부하를 막습니다.
+
+## 집 조명 연동 (Smart Life / Tuya)
+
+- 브라우저는 직접 Tuya에 요청하지 않습니다(CORS·서명키 노출). 대신 Supabase Edge Function **`tuya-lights`**(`supabase/functions/tuya-lights/index.ts`)가 tuya-device-sharing-sdk 프로토콜(MD5 + HMAC-SHA256 + AES-128-GCM)로 서명해 중계합니다.
+- Smart Life 토큰은 `public.tuya_connections`에만 있습니다. 이 테이블은 RLS를 켜고 `anon`·`authenticated` 권한을 **회수**해 브라우저 키로는 읽을 수도 쓸 수도 없습니다(service_role 전용).
+- 호출: `POST /functions/v1/tuya-lights` + `x-room-code` 헤더 + `apikey/Authorization`(anon)
+  - `{"action":"list"}` → 기기·스위치 상태
+  - `{"action":"command","device_id":"...","code":"switch_1","value":true}` → 제어 후 최신 상태
+  - `{"action":"all_off"}` → 켜진 채널 일괄 소등
+  - `{"action":"save_label","device_id":"...","code":"switch_1","label":"거실 메인등"}` → 별명 저장(`family_rooms.light_labels`)
+- 액세스 토큰 만료 60초 전이거나 Tuya가 만료를 알리면 Edge Function이 `GET /v1.0/m/token/{refresh_token}`으로 스스로 갱신해 DB에 다시 저장합니다(사람 손 필요 없음).
+- 스위치 별명은 `family_rooms.light_labels`(키 `기기ID.채널`, 예 `eb3d7596e5372a9a0fytj3.switch_1`)에 들어가고 Realtime으로 가족 전원에게 즉시 반영됩니다.
 
 ## 초파(에이전트)가 학원 숙제를 DB에 직접 넣는 법
 
