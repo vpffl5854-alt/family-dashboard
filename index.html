@@ -5199,12 +5199,12 @@ async function bookSubmitAnswer() {
     if (res.status === 'revise') {
       BOOKS.attempt += 1;
       BOOKS.feedbackKind = 'revise';
-      BOOKS.answerText = '';
+      bookClearAnswerBox();
     } else {
       BOOKS.qa.push({ question: BOOKS.question, answer });
       BOOKS.attempt = 1;
       BOOKS.feedbackKind = 'pass';
-      BOOKS.answerText = '';
+      bookClearAnswerBox();
       if (res.status === 'complete' || !res.nextQuestion) {
         BOOKS.stage = 'card';
         renderBooks();
@@ -5248,6 +5248,12 @@ async function bookSummarize(manual) {
     if (!manual) BOOKS.stage = 'card';
   }
   renderBooks();
+}
+
+function bookClearAnswerBox() {
+  BOOKS.answerText = '';
+  const el = document.getElementById('bookAnswerInput');
+  if (el) el.value = '';
 }
 
 function bookSetRating(n) {
