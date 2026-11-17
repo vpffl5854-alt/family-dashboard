@@ -1,9 +1,47 @@
 # 우리 가족 기록장
 
-가족용 기록 대시보드. `index.html` 단일 파일(HTML·CSS·JS 인라인, 외부 라이브러리 의존 없음).
+가족용 기록 대시보드. `index.html` 단일 파일(HTML·CSS·JS 인라인) + Supabase 실시간 동기화.
 
 - 라이브 주소: https://vpffl5854-alt.github.io/family-dashboard/
 - 배포 소스: **`gh-pages` 브랜치 루트 (`/`)** — GitHub Pages가 이 브랜치를 서빙합니다.
 - `main` 브랜치: 원본 보관용. `main`에만 푸시하면 사이트는 바뀌지 않습니다.
 - 갱신하려면: `index.html`을 고친 뒤 `main`과 `gh-pages` **양쪽에** 반영하세요.
-- 데이터는 서버 없이 각 기기 브라우저에 저장됩니다(가족 채팅은 "이 기기 저장 모드").
+
+## 기능
+
+1. 날씨·미세먼지 + **오늘 옷차림 추천**(기온·일교차·강수 확률 기반) + **5일 예보**(Open-Meteo, 키 없음)
+2. **가족 공유 일정 · D-Day** — 월간 달력 배지/점, 날짜 클릭 → 그날 일정, D-Day 카운트다운
+3. **학교 급식** — 나이스 교육정보 Open API(키 없음, CORS 허용). 학교 검색 → 저장(가족 공유), 오늘·이번 주 식단, 알레르기 번호 토글
+4. **키 · 몸무게 · BMI 성장 기록** — BMI 자동 계산, 최신 수치 카드, 인라인 SVG 추이 그래프(키/몸무게/BMI), 구성원 필터
+5. **학원·학교 숙제** — 과목·마감일(D-day 배지)·담당·완료 체크, 완료 시 도장 연동
+6. 기존 기능: 오늘의 미션 · 할 일 · 도장판 · 공부 타이머 · 기기 잠금 · 가족 채팅(스티커/15초 음성) · 용돈기입장 · 설정/공유 코드
+
+## 데이터 동기화 (Supabase)
+
+- 프로젝트: `family-dashboard` (ref `hwhrvamjypamuesueouc`, 리전 `ap-northeast-2` 서울)
+- 브라우저는 공개용 anon(publishable) 키만 사용합니다. `service_role` 키와 DB 비밀번호는 코드·깃에 넣지 않습니다.
+- 테이블(항목 단위, 모두 `room_id` 기준):
+  - 기본: `family_rooms`, `family_members`, `family_todos`, `family_studies`, `family_study_logs`, `family_stamps`, `family_missions`, `family_chat_messages`, `family_allowance_tx`
+  - v2(2026-11-17): `family_events`(일정·D-Day), `family_growth`(키·몸무게·BMI), `family_homeworks`(숙제)
+  - `family_rooms`에 급식 학교 설정 컬럼: `school_office_code`, `school_code`, `school_name` (기본값 대구 경명여자중학교 = `D10` / `7261037`)
+- 스키마·RLS·Realtime 설정 SQL: `supabase-schema.sql` (여러 번 실행해도 안전 — `add column if not exists` / `create table if not exists`만 사용)
+- 모든 테이블에 RLS를 켜고, 요청 헤더 `x-room-code`와 `room_id`가 일치할 때만 읽기/쓰기를 허용합니다.
+- Realtime(`postgres_changes`) 구독으로 다른 기기의 변경이 즉시 화면에 반영됩니다. `localStorage`는 캐시·오프라인 폴백으로만 씁니다.
+- 가족 공유 코드(기본 `our-family`)가 같으면 같은 기록장을 함께 씁니다. 설정 모달에서 코드를 확인·변경할 수 있습니다.
+- 음성 메시지는 15초 안쪽(약 150KB 이하)으로 제한해 DB·Realtime 부하를 막습니다.
+
+## 초파(에이전트)가 학원 숙제를 DB에 직접 넣는 법
+
+`family_homeworks`에 행을 넣으면 열려 있는 대시보드에 실시간으로 나타납니다(`source: 'pickle'`이면 화면에 `✨ 초파가 넣음` 배지).
+
+```bash
+curl -X POST "https://hwhrvamjypamuesueouc.supabase.co/rest/v1/family_homeworks" \
+  -H "apikey: <anon key>" -H "Content-Type: application/json" \
+  -H "x-room-code: our-family" \
+  -d '{"room_id":"our-family","id":"hw-pickle-20261117-1","member_id":"m1","subject":"수학","title":"익힘책 32~35쪽","due_date":"2026-11-19","done":false,"source":"pickle","position":100}'
+```
+
+- `id`는 방 안에서만 겹치지 않으면 됩니다(예: `hw-pickle-<날짜>-<번호>`).
+- `member_id`는 `family_members.id`(m1·m2·m3) 또는 `all`.
+- `due_date`는 `YYYY-MM-DD` 문자열, 비우면 `''`.
+- 같은 방식으로 `family_events`(일정), `family_growth`(성장 기록)도 넣을 수 있습니다.
