@@ -288,6 +288,11 @@ async function withToken(conn: Conn, fn: (c: Conn) => Promise<any>): Promise<{ c
 // ---------------------------------------------------------------- devices
 const SWITCH_RE = /^switch_\d+$/;
 
+// 맥미니가 꽂혀 있는 스마트플러그 '미니'.
+// 식구들이 실수로 끄거나 '전체 소등'에 걸리면 맥미니 전원이 꺼지므로
+// 목록에서 아예 빼고(list), 제어는 403으로 막고(command), 전체 소등에서도 건너뛴다(all_off).
+const EXCLUDED_DEVICE_IDS = new Set(['eb1f8a6820f472f854knoa']);
+
 function mapDevice(d: any) {
   const status: any[] = Array.isArray(d.status) ? d.status : [];
   const switches = status
@@ -315,7 +320,7 @@ async function listDevices(conn: Conn) {
     homeId: conn.home_id,
   });
   const list = Array.isArray(result) ? result : [];
-  return list.map(mapDevice);
+  return list.filter((d: any) => !EXCLUDED_DEVICE_IDS.has(String(d?.id))).map(mapDevice);
 }
 
 async function readLabels(conn: Conn): Promise<Record<string, string>> {
@@ -371,6 +376,9 @@ Deno.serve(async (req) => {
       const code = String(reqBody.code || '');
       const value = reqBody.value === true;
       if (!deviceId || !SWITCH_RE.test(code)) return json({ error: 'device_id/code 값이 올바르지 않습니다.' }, 400);
+      if (EXCLUDED_DEVICE_IDS.has(deviceId)) {
+        return json({ error: '보호된 기기라 제어할 수 없어요.' }, 403);
+      }
 
       const { data } = await withToken(typed, async (c) => {
         const devices = await listDevices(c);
@@ -392,7 +400,9 @@ Deno.serve(async (req) => {
     if (action === 'all_off') {
       const { data } = await withToken(typed, async (c) => {
         const devices = await listDevices(c);
-        const targets = devices.filter((d: any) => d.online && d.switches.length);
+        const targets = devices.filter(
+          (d: any) => d.online && d.switches.length && !EXCLUDED_DEVICE_IDS.has(String(d.id)),
+        );
         let changed = 0;
         for (const d of targets) {
           const on = d.switches.filter((s: any) => s.on);
