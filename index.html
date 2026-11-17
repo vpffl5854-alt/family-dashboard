@@ -4151,10 +4151,15 @@ function renderLights() {
     else summaryText.textContent = `${onCount}개 켜져 있어요`;
   }
   if (summaryBadge) {
-    summaryBadge.className = 'badge ' + (onCount ? 'badge-amber' : 'badge-gray');
-    summaryBadge.textContent = onCount ? '💡 켜짐' : 'OFF';
+    if (!LIGHTS.loaded || LIGHTS.error) {
+      summaryBadge.className = 'badge badge-gray';
+      summaryBadge.textContent = LIGHTS.error ? '확인 필요' : '...';
+    } else {
+      summaryBadge.className = 'badge ' + (onCount ? 'badge-amber' : 'badge-gray');
+      summaryBadge.textContent = onCount ? '💡 켜짐' : 'OFF';
+    }
   }
-  if (summaryIcon) summaryIcon.textContent = onCount ? '💡' : '🌙';
+  if (summaryIcon) summaryIcon.textContent = onCount ? '💡' : (LIGHTS.loaded && !LIGHTS.error ? '🌙' : '💡');
 
   if (unconnected) {
     badge.className = 'badge badge-gray';
