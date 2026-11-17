@@ -130,17 +130,20 @@
   }
   .nav-tabs::-webkit-scrollbar { display: none; }
   .nav-tab {
-    flex: 1 0 auto;
+    flex: 0 0 auto;
     border: none;
     background: transparent;
     color: var(--muted);
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 7px 12px;
+    padding: 7px 11px;
     border-radius: 999px;
     cursor: pointer;
     white-space: nowrap;
+    line-height: 1.2;
   }
+  .nav-tab.active { background: var(--text); color: #FFFDF7; }
+  .nav-tabs { gap: 3px; }
   .nav-tab.active {
     background: var(--text);
     color: #FFFDF7;
@@ -648,7 +651,7 @@
   }
 
   /* Inputs */
-  input[type="text"], input[type="number"], input[type="time"], select {
+  input[type="text"], input[type="number"], input[type="time"], input[type="date"], select {
     border: 1.5px solid var(--border);
     background: #FFF;
     border-radius: 12px;
@@ -771,6 +774,200 @@
   .sync-badge.connecting { background: #FFF7E8; border-color: #F6D8AE; color: #B45309; }
   .sync-badge.warn { background: #FFF4E8; border-color: #F3C99B; color: #B45309; }
   .sync-badge.offline { background: #F6F3EC; border-color: #E3DCCB; color: #8A7E6B; }
+
+  /* ===== v2: 예보 · 옷차림 ===== */
+  .outfit-line {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    background: #FFF7E8;
+    border: 1px dashed #F0CFA0;
+    border-radius: 13px;
+    padding: 8px 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #8A5A12;
+    line-height: 1.45;
+  }
+  .forecast-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .forecast-day {
+    background: #FFFDF8;
+    border: 1.5px solid #EFE7CF;
+    border-radius: 13px;
+    padding: 7px 2px;
+    text-align: center;
+  }
+  .forecast-day.today { border-color: #F6AD55; background: #FFF6E5; }
+  .forecast-label { font-size: 10.5px; font-weight: 800; color: var(--muted); }
+  .forecast-icon { font-size: 17px; line-height: 1.2; margin: 1px 0; }
+  .forecast-temp { font-size: 11px; font-weight: 800; white-space: nowrap; }
+  .forecast-temp .min { color: #5B8DEF; font-weight: 700; }
+  .forecast-rain { font-size: 10px; font-weight: 700; color: #2B6CB0; min-height: 13px; }
+
+  /* ===== v2: 일정 · D-Day ===== */
+  .dday-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FFFDF8;
+    border: 1.5px solid #F5D9C0;
+    border-radius: 15px;
+    padding: 10px 11px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+  }
+  .dday-badge {
+    min-width: 52px;
+    text-align: center;
+    font-size: 12.5px;
+    font-weight: 900;
+    color: #C05621;
+    background: #FFF1E3;
+    border: 1.5px solid #F6C99B;
+    border-radius: 12px;
+    padding: 6px 4px;
+    line-height: 1.15;
+  }
+  .dday-badge.today { background: #FFE0E0; border-color: #F19999; color: #C53030; }
+  .dday-badge.soon { background: #FFE9CC; border-color: #F3B65E; color: #B45309; }
+  .dday-title { font-size: 14px; font-weight: 800; word-break: break-word; }
+  .day-detail-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #FFFDF8;
+    border: 1px solid #EFE7CF;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cal-cell.has-event { border-color: #F6C99B; background: #FFF8EE; }
+  .cal-cell.today-cell { outline: 2px solid #63B3ED; outline-offset: -2px; }
+  .cal-dots { display: flex; gap: 2px; height: 6px; align-items: center; justify-content: center; margin-top: 1px; }
+  .cal-dot { width: 4px; height: 4px; border-radius: 50%; background: #F4A261; }
+  .cal-dot.dday { background: #E53E3E; }
+
+  /* ===== v2: 급식 ===== */
+  .meal-day-tabs { display: flex; gap: 5px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; scrollbar-width: none; }
+  .meal-day-tabs::-webkit-scrollbar { display: none; }
+  .meal-day-tab {
+    flex: 0 0 auto;
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    border-radius: 12px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    line-height: 1.25;
+    text-align: center;
+  }
+  .meal-day-tab.active { background: #EAF6EE; border-color: #9FD8B4; color: #276749; }
+  .meal-day-tab.empty { opacity: 0.45; }
+  .meal-type { margin-bottom: 10px; }
+  .meal-type-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .meal-type-name { font-size: 13px; font-weight: 900; color: #2F5D46; }
+  .meal-kcal { font-size: 11.5px; font-weight: 800; color: #B7791F; }
+  .meal-dishes { display: flex; flex-direction: column; gap: 5px; }
+  .meal-dish {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: #F9FCF8;
+    border: 1px solid #DCECE1;
+    border-radius: 11px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .allergy-tag {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: #B45309;
+    background: #FFF3D6;
+    border: 1px solid #F6D88C;
+    border-radius: 8px;
+    padding: 1px 6px;
+    white-space: nowrap;
+  }
+  .empty-hint {
+    text-align: center;
+    padding: 14px 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ===== v2: 성장 기록 ===== */
+  .chip-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+  .chip-row::-webkit-scrollbar { display: none; }
+  .chip-btn {
+    flex: 0 0 auto;
+    border: 1.5px solid var(--border);
+    background: #FFF;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip-btn.active { background: var(--text); border-color: var(--text); color: #FFFDF7; }
+  .growth-latest { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .growth-latest::-webkit-scrollbar { display: none; }
+  .growth-card {
+    flex: 0 0 auto;
+    min-width: 118px;
+    background: #FFFDF8;
+    border: 1.5px solid #E7E0CB;
+    border-radius: 15px;
+    padding: 9px 11px;
+  }
+  .growth-card-name { font-size: 12px; font-weight: 800; color: var(--muted); }
+  .growth-card-big { font-size: 19px; font-weight: 900; margin-top: 2px; }
+  .growth-card-sub { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 1px; }
+  .bmi-tag { font-size: 10.5px; font-weight: 800; padding: 1px 6px; border-radius: 7px; border: 1px solid; }
+  .bmi-low { background: #EBF5FF; color: #2B6CB0; border-color: #C6E0FA; }
+  .bmi-ok { background: #E6F7ED; color: #276749; border-color: #B8E6C8; }
+  .bmi-over { background: #FFF3D6; color: #975A16; border-color: #F6D88C; }
+  .bmi-obese { background: #FFF0F0; color: #C53030; border-color: #FAD2D2; }
+  .chart-wrap { margin: 8px 0 4px; }
+  .chart-legend { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 4px; }
+  .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 3px; }
+
+  /* ===== v2: 숙제 ===== */
+  .hw-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 11px;
+    border-radius: 15px;
+    background: #FFFDF8;
+    border: 1.5px solid #EFE7CF;
+  }
+  .hw-item.done { background: #F7FAF8; border-color: #DCECE1; }
+  .hw-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+  .hw-item.done .hw-title { text-decoration: line-through; color: var(--muted); }
+  .hw-title { font-size: 14px; font-weight: 700; word-break: break-word; }
+  .hw-meta { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+  .due-pill {
+    font-size: 10.5px;
+    font-weight: 800;
+    padding: 1px 7px;
+    border-radius: 8px;
+    background: #FFF1E3;
+    color: #B45309;
+    border: 1px solid #F6C99B;
+  }
+  .due-pill.late { background: #FFF0F0; color: #C53030; border-color: #F3B7B7; }
+  .due-pill.today { background: #FFE0E0; color: #C53030; border-color: #F19999; }
+  .src-pickle { font-size: 10.5px; font-weight: 800; color: #6B46C1; background: #F3EEFF; border: 1px solid #D6C6FF; border-radius: 8px; padding: 1px 6px; }
 </style>
 </head>
 <body>
@@ -798,7 +995,10 @@
   <nav class="nav-tabs" id="navTabs">
     <button class="nav-tab active" data-tab="all" onclick="switchTab('all')">전체</button>
     <button class="nav-tab" data-tab="home" onclick="switchTab('home')">🏠 홈</button>
-    <button class="nav-tab" data-tab="study" onclick="switchTab('study')">📚 공부·타이머</button>
+    <button class="nav-tab" data-tab="study" onclick="switchTab('study')">📚 공부·숙제</button>
+    <button class="nav-tab" data-tab="schedule" onclick="switchTab('schedule')">📅 일정·D-Day</button>
+    <button class="nav-tab" data-tab="meal" onclick="switchTab('meal')">🍱 급식</button>
+    <button class="nav-tab" data-tab="growth" onclick="switchTab('growth')">🌱 성장</button>
     <button class="nav-tab" data-tab="chat" onclick="switchTab('chat')">💬 가족채팅</button>
     <button class="nav-tab" data-tab="ledger" onclick="switchTab('ledger')">🐷 용돈기입장</button>
   </nav>
@@ -818,6 +1018,8 @@
         <span class="badge" id="pm25Badge">초미세먼지 확인중</span>
         <span class="weather-sub" id="weatherTip">좋은 하루 보내세요</span>
       </div>
+      <div class="outfit-line" id="outfitLine">👕 오늘 옷차림을 준비하고 있어요</div>
+      <div class="forecast-strip" id="forecastStrip"></div>
     </div>
 
     <!-- Family Members Summary -->
@@ -910,6 +1112,17 @@
       <!-- Study Items -->
       <div class="item-list" id="studyList"></div>
     </div>
+
+    <!-- Academy & School Homework -->
+    <div class="card card-soft-pink">
+      <div class="card-head">
+        <h2 class="card-title">📝 학원·학교 숙제</h2>
+        <span class="badge badge-gray" id="hwCountBadge">0개 남음</span>
+      </div>
+      <p class="card-desc">과목과 마감일을 적어두면 가족 모두가 같은 화면에서 확인하고 체크해요.</p>
+      <button class="btn btn-full btn-amber" onclick="openHomeworkModal()" style="margin-bottom:10px;">+ 숙제 추가</button>
+      <div class="item-list" id="homeworkList"></div>
+    </div>
   </section>
 
   <!-- CHAT SECTION -->
@@ -973,6 +1186,73 @@
       <div class="item-list" id="ledgerHistoryList"></div>
     </div>
   </section>
+
+  <!-- SCHEDULE & D-DAY SECTION -->
+  <section data-section="schedule">
+    <div class="card card-soft-pink">
+      <div class="card-head">
+        <h2 class="card-title">🎯 다가오는 D-Day</h2>
+        <span class="badge" id="ddayCountBadge">0개</span>
+      </div>
+      <p class="card-desc">시험·발표·여행처럼 중요한 날까지 남은 날을 세어줘요.</p>
+      <div class="item-list" id="ddayList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">📅 가족 일정</h2>
+        <button class="pill-btn" onclick="openMonthCalendar()">🗓 달력</button>
+      </div>
+      <p class="card-desc">날짜·시간·담당 가족·카테고리를 정해 가족 모두와 함께 봐요.</p>
+      <button class="btn btn-full btn-blue" onclick="openEventModal()" style="margin-bottom:10px;">+ 일정 추가</button>
+      <div class="item-list" id="eventList"></div>
+    </div>
+  </section>
+
+  <!-- SCHOOL MEAL SECTION -->
+  <section data-section="meal">
+    <div class="card card-mint">
+      <div class="card-head">
+        <h2 class="card-title">🍱 오늘의 급식</h2>
+        <button class="pill-btn" onclick="openSchoolSearch()">🏫 학교 변경</button>
+      </div>
+      <div class="date-sub" id="mealSchoolLine">학교 정보를 불러오는 중...</div>
+      <div id="mealToday" style="margin-top:10px;"></div>
+      <div class="stamp-footer" style="margin-top:12px;">
+        <button class="btn btn-sm" id="allergyToggleBtn" onclick="toggleAllergy()">알레르기 번호 보기</button>
+        <button class="btn btn-sm btn-blue" onclick="loadMeals(true)">🔄 새로고침</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">📆 이번 주 급식</h2>
+        <span class="badge badge-gray" id="mealWeekBadge">이번 주</span>
+      </div>
+      <div class="meal-day-tabs" id="mealDayTabs"></div>
+      <div id="mealWeekBody"></div>
+    </div>
+  </section>
+
+  <!-- GROWTH SECTION -->
+  <section data-section="growth">
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title">🌱 키 · 몸무게 · BMI</h2>
+        <button class="pill-btn" onclick="openGrowthModal()">+ 기록 추가</button>
+      </div>
+      <p class="card-desc">잰 날의 키와 몸무게를 적으면 BMI를 계산해 추이로 보여줘요.</p>
+      <div class="chip-row" id="growthMemberChips"></div>
+      <div class="growth-latest" id="growthLatestCards"></div>
+      <div class="seg-tabs" style="margin-top:12px;">
+        <button class="seg-btn active" id="gmHeight" onclick="setGrowthMetric('height')">키</button>
+        <button class="seg-btn" id="gmWeight" onclick="setGrowthMetric('weight')">몸무게</button>
+        <button class="seg-btn" id="gmBmi" onclick="setGrowthMetric('bmi')">BMI</button>
+      </div>
+      <div class="chart-wrap" id="growthChart"></div>
+      <div class="item-list" id="growthList" style="margin-top:10px;"></div>
+    </div>
+  </section>
 </div>
 
 <!-- Modal Backdrop -->
@@ -995,6 +1275,10 @@ const DEFAULT_STATE = {
   appName: '우리 가족 기록장',
   appLogo: '🐾',
   city: { name: '대구 침산동', lat: 35.8866, lon: 128.5902 },
+  school: { officeCode: 'D10', schoolCode: '7261037', name: '경명여자중학교' },
+  events: [],
+  growth: [],
+  homeworks: [],
   members: [
     { id: 'm1', name: '초파', role: '오늘의 주인공', avatar: '🐹', mascot: '함께 기록 중' },
     { id: 'm2', name: '엄마', role: '함께 응원해요', avatar: '🐰', mascot: '따뜻한 서포터' },
@@ -1129,10 +1413,65 @@ function switchTab(tab) {
 }
 
 /* Weather */
+function mapWeatherCode(c) {
+  return c === 0 ? ['☀️','맑음']
+    : c <= 3 ? ['⛅','구름 조금']
+    : c <= 48 ? ['🌫️','안개']
+    : c <= 57 ? ['🌦️','이슬비']
+    : c <= 67 ? ['🌧️','비']
+    : c <= 77 ? ['❄️','눈']
+    : c <= 82 ? ['🌧️','소나기']
+    : c <= 86 ? ['🌨️','눈 소나기']
+    : ['⛈️','뇌우'];
+}
+
+function outfitAdvice(tMax, tMin, rainProb) {
+  const diff = tMax - tMin;
+  let clothes;
+  if (tMax >= 28) clothes = '반팔·얇은 소재';
+  else if (tMax >= 23) clothes = '긴팔·얇은 가디건';
+  else if (tMax >= 17) clothes = '맨투맨·가벼운 자켓';
+  else if (tMax >= 12) clothes = '니트·코트';
+  else if (tMax >= 5) clothes = '두꺼운 외투·따뜻한 니트';
+  else clothes = '패딩·목도리까지';
+  const items = [];
+  if (diff >= 10) items.push(`일교차 ${diff}°로 커요, 겉옷 필수`);
+  else if (diff >= 7) items.push('아침저녁은 쌀쌀해요');
+  if (rainProb >= 60) items.push('우산 꼭 챙기기');
+  else if (rainProb >= 30) items.push('작은 우산 있으면 좋아요');
+  if (tMin <= 3) items.push('장갑 챙기기');
+  return items.length ? `${clothes}가 좋아요 · ${items.join(', ')}` : `${clothes}가 딱 좋아요`;
+}
+
+const WEEKDAY_KO = ['일','월','화','수','목','금','토'];
+
+function renderForecast(daily) {
+  const strip = document.getElementById('forecastStrip');
+  if (!strip) return;
+  const dates = daily.time || [];
+  if (!dates.length) { strip.innerHTML = ''; return; }
+  const now = new Date();
+  strip.innerHTML = dates.slice(0, 5).map((dstr, i) => {
+    const d = new Date(dstr + 'T00:00:00');
+    const tMax = Math.round(daily.temperature_2m_max[i]);
+    const tMin = Math.round(daily.temperature_2m_min[i]);
+    const rain = Math.round(daily.precipitation_probability_max?.[i] ?? 0);
+    const [icon] = mapWeatherCode(daily.weather_code[i]);
+    const isToday = todayKey(d) === todayKey(now);
+    const label = isToday ? '오늘' : (todayKey(new Date(now.getTime() + 86400000)) === todayKey(d) ? '내일' : WEEKDAY_KO[d.getDay()]);
+    return `<div class="forecast-day ${isToday ? 'today' : ''}">
+      <div class="forecast-label">${label}</div>
+      <div class="forecast-icon" title="${escapeHtml(mapWeatherCode(daily.weather_code[i])[1])}">${icon}</div>
+      <div class="forecast-temp">${tMax}° <span class="min">${tMin}°</span></div>
+      <div class="forecast-rain">${rain >= 30 ? `☔ ${rain}%` : ''}</div>
+    </div>`;
+  }).join('');
+}
+
 async function loadWeather() {
   try {
     const { name, lat, lon } = state.city;
-    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul`;
+    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_probability_max&forecast_days=5&timezone=Asia%2FSeoul`;
     const aUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5&timezone=Asia%2FSeoul`;
     const [wRes, aRes] = await Promise.all([fetch(wUrl), fetch(aUrl)]);
     const w = await wRes.json();
@@ -1141,12 +1480,14 @@ async function loadWeather() {
     const temp = Math.round(w.current.temperature_2m);
     const tMin = Math.round(w.daily.temperature_2m_min[0]);
     const tMax = Math.round(w.daily.temperature_2m_max[0]);
-    const code = w.current.weather_code;
-    const mapCode = c => c === 0 ? ['☀️','맑음'] : c <= 3 ? ['⛅','구름 조금'] : c <= 48 ? ['🌫️','안개'] : c <= 67 ? ['🌧️','비'] : c <= 77 ? ['❄️','눈'] : ['🌦️','소나기'];
-    const [icon, desc] = mapCode(code);
+    const rainProb = Math.round(w.daily.precipitation_probability_max?.[0] ?? 0);
+    const [icon, desc] = mapWeatherCode(w.current.weather_code);
 
     document.getElementById('weatherIcon').textContent = icon;
     document.getElementById('weatherMainText').textContent = `${name} ${temp}° ${desc} · 최저 ${tMin}° 최고 ${tMax}°`;
+
+    document.getElementById('outfitLine').textContent = `👕 ${outfitAdvice(tMax, tMin, rainProb)}`;
+    renderForecast(w.daily);
 
     const pm10 = Math.round(a.current.pm10 ?? 25);
     const pm25 = Math.round(a.current.pm2_5 ?? 12);
@@ -1159,6 +1500,7 @@ async function loadWeather() {
     document.getElementById('weatherMainText').textContent = `${state.city.name} · 오프라인 모드`;
     document.getElementById('pm10Badge').textContent = '날씨 대기';
     document.getElementById('pm25Badge').textContent = '설정에서 지역 변경';
+    document.getElementById('outfitLine').textContent = '👕 연결되면 오늘 옷차림을 알려드릴게요';
   }
 }
 
@@ -1867,6 +2209,774 @@ function addLedgerTx(type) {
   showCoinToast(type === 'income' ? `🪙 +${amount.toLocaleString()}원 입금!` : `💸 -${amount.toLocaleString()}원 기록!`);
 }
 
+/* ==================================================================
+   v2 기능: 가족 일정·D-Day / 학교 급식 / 성장 기록 / 학원 숙제
+   ================================================================== */
+
+/* ---------- 공통 날짜 도우미 ---------- */
+function parseDateKey(k) { return new Date(String(k) + 'T00:00:00'); }
+function dayDiffFromToday(dateKey) {
+  const a = parseDateKey(todayKey());
+  const b = parseDateKey(dateKey);
+  return Math.round((b - a) / 86400000);
+}
+function ddayText(dateKey) {
+  const diff = dayDiffFromToday(dateKey);
+  if (diff === 0) return 'D-DAY';
+  if (diff > 0) return 'D-' + diff;
+  return 'D+' + Math.abs(diff);
+}
+function dateKo(dateKey) {
+  if (!dateKey) return '';
+  const d = parseDateKey(dateKey);
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 (${WEEKDAY_KO[d.getDay()]})`;
+}
+
+/* ---------- 가족 일정 · D-Day ---------- */
+function memberById(id) { return (state.members || []).find(m => m.id === id) || null; }
+function eventMemberLabel(id) {
+  if (!id || id === 'all') return '가족 모두';
+  const m = memberById(id);
+  return m ? m.name : '가족';
+}
+function sortedEvents() {
+  return [...(state.events || [])].sort((a, b) => {
+    const ka = String(a.date || '') + ' ' + String(a.time || '');
+    const kb = String(b.date || '') + ' ' + String(b.time || '');
+    return ka.localeCompare(kb);
+  });
+}
+
+function renderEvents() {
+  const tk = todayKey();
+  const all = sortedEvents();
+  const upcoming = all.filter(e => String(e.date || '') >= tk);
+  const past = all.filter(e => String(e.date || '') < tk).slice(-4).reverse();
+
+  const ddays = upcoming.filter(e => e.isDday);
+  const ddayBox = document.getElementById('ddayList');
+  const ddayBadge = document.getElementById('ddayCountBadge');
+  if (ddayBadge) ddayBadge.textContent = `${ddays.length}개`;
+  if (ddayBox) {
+    ddayBox.innerHTML = ddays.length ? ddays.slice(0, 6).map(e => {
+      const diff = dayDiffFromToday(e.date);
+      const cls = diff === 0 ? 'today' : diff <= 7 ? 'soon' : '';
+      return `<button class="dday-row" onclick="openEventModal('${e.id}')">
+        <span class="dday-badge ${cls}">${diff === 0 ? '오늘!' : 'D-' + diff}</span>
+        <span style="flex:1; min-width:0;">
+          <span class="dday-title" style="display:block;">${escapeHtml(e.title)}</span>
+          <span class="member-sub" style="display:block;">${escapeHtml(dateKo(e.date))}${e.time ? ' · ' + escapeHtml(e.time) : ''} · ${escapeHtml(e.category || '가족')}</span>
+        </span>
+      </button>`;
+    }).join('') : '<div class="empty-hint">아직 D-Day 일정이 없어요.<br/>일정을 만들 때 <b>D-Day로 표시</b>를 체크해보세요.</div>';
+  }
+
+  const list = document.getElementById('eventList');
+  if (!list) return;
+  const rowHtml = (e, dim) => {
+    const diff = dayDiffFromToday(e.date);
+    const cls = diff === 0 ? 'today' : diff > 0 && diff <= 7 ? 'soon' : '';
+    const m = memberById(e.memberId);
+    return `<div class="task-item" style="${dim ? 'opacity:0.55;' : ''}">
+      <div class="task-left" onclick="openEventModal('${e.id}')">
+        <span class="dday-badge ${cls}">${diff >= 0 ? (diff === 0 ? '오늘' : 'D-' + diff) : '지남'}</span>
+        <div style="min-width:0;">
+          <div class="task-title">${e.isDday ? '🎯 ' : ''}${escapeHtml(e.title)}</div>
+          <div class="task-meta">
+            <span class="chip">${escapeHtml(dateKo(e.date))}</span>
+            ${e.time ? `<span class="chip">⏰ ${escapeHtml(e.time)}</span>` : ''}
+            <span class="chip">${escapeHtml(e.category || '가족')}</span>
+            <span class="chip">${m ? escapeHtml(m.avatar + ' ' + m.name) : '👨‍👩‍👧 가족 모두'}</span>
+          </div>
+          ${e.memo ? `<div class="member-sub" style="margin-top:3px;">${escapeHtml(e.memo)}</div>` : ''}
+        </div>
+      </div>
+      <div class="task-btns">
+        <button class="mini-icon-btn" onclick="openEventModal('${e.id}')">✏️</button>
+        <button class="mini-icon-btn" onclick="deleteEvent('${e.id}')">✕</button>
+      </div>
+    </div>`;
+  };
+  const body = [...upcoming.map(e => rowHtml(e, false)), ...past.map(e => rowHtml(e, true))].join('');
+  list.innerHTML = body || '<div class="empty-hint">아직 등록된 일정이 없어요.<br/>“+ 일정 추가”로 첫 일정을 넣어보세요.</div>';
+}
+
+function openEventModal(id, presetDate) {
+  const e = id ? (state.events || []).find(x => x.id === id) : null;
+  const cats = ['가족', '학교', '학원', '병원', '여행', '기념일', '기타'];
+  const catOpts = cats.map(c => `<option value="${c}" ${(e ? e.category : '가족') === c ? 'selected' : ''}>${c}</option>`).join('');
+  const memberOpts = `<option value="all" ${!e || e.memberId === 'all' ? 'selected' : ''}>가족 모두</option>` +
+    (state.members || []).map(m => `<option value="${m.id}" ${e && e.memberId === m.id ? 'selected' : ''}>${escapeHtml(m.avatar + ' ' + m.name)}</option>`).join('');
+  const dateVal = e ? e.date : (presetDate || todayKey());
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">${e ? '✏️ 일정 수정' : '📅 일정 추가'}</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <input type="text" id="evTitle" placeholder="일정 이름 (예: 중간고사, 할머니 생신)" value="${e ? escapeHtml(e.title) : ''}" />
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">날짜</label><input type="date" id="evDate" value="${escapeHtml(dateVal)}" /></div>
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">시간</label><input type="time" id="evTime" value="${e && e.time ? escapeHtml(e.time) : ''}" /></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">담당 가족</label><select id="evMember">${memberOpts}</select></div>
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">카테고리</label><select id="evCategory">${catOpts}</select></div>
+      </div>
+      <input type="text" id="evMemo" placeholder="메모 (준비물, 장소 등)" value="${e ? escapeHtml(e.memo || '') : ''}" />
+      <label style="display:flex; align-items:center; gap:7px; font-size:13px; font-weight:800; cursor:pointer;">
+        <input type="checkbox" id="evDday" ${e && e.isDday ? 'checked' : ''} /> 🎯 D-Day로 표시 (홈·일정 탭에 카운트다운)
+      </label>
+      <div class="btn-row" style="margin-top:4px;">
+        <button class="btn" onclick="closeModal()">취삵</button>
+        <button class="btn btn-green" onclick="saveEvent(${id ? `'${id}'` : 'null'})">${e ? '수정 저장' : '추가하기'}</button>
+      </div>
+    </div>
+  `);
+}
+
+function saveEvent(id) {
+  const title = document.getElementById('evTitle').value.trim();
+  if (!title) { showCoinToast('⚠️ 일정 이름을 적어주세요'); return; }
+  const dateVal = document.getElementById('evDate').value || todayKey();
+  const payload = {
+    title,
+    date: dateVal,
+    time: document.getElementById('evTime').value || '',
+    memberId: document.getElementById('evMember').value || 'all',
+    category: document.getElementById('evCategory').value || '가족',
+    memo: document.getElementById('evMemo').value.trim(),
+    isDday: !!document.getElementById('evDday').checked
+  };
+  if (id) {
+    const e = (state.events || []).find(x => x.id === id);
+    if (!e) return;
+    Object.assign(e, payload);
+  } else {
+    state.events = state.events || [];
+    state.events.push({ id: 'ev' + Date.now(), ...payload });
+  }
+  saveState();
+  closeModal();
+  renderEvents();
+  showCoinToast(id ? '✏️ 일정을 수정했어요' : '📅 일정을 추가했어요');
+}
+
+function deleteEvent(id) {
+  const e = (state.events || []).find(x => x.id === id);
+  if (!e) return;
+  if (!confirm(`"${e.title}" 일정을 지울까요?`)) return;
+  state.events = (state.events || []).filter(x => x.id !== id);
+  saveState();
+  renderEvents();
+  closeModal();
+  showCoinToast('🗑️ 일정을 지웠어요');
+}
+
+/* 월간 달력 (도장 + 일정 배지) */
+const CAL = { ym: null };
+function openMonthCalendar(ym) {
+  const now = new Date();
+  if (ym) CAL.ym = ym;
+  if (!CAL.ym) CAL.ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [y, m] = CAL.ym.split('-').map(Number);
+  const offset = (new Date(y, m - 1, 1).getDay() + 6) % 7;
+  const lastDate = new Date(y, m, 0).getDate();
+  const tk = todayKey();
+  const prev = new Date(y, m - 2, 1);
+  const next = new Date(y, m, 1);
+  const ymOf = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
+  const byDay = {};
+  (state.events || []).forEach(e => { (byDay[e.date] = byDay[e.date] || []).push(e); });
+
+  let cells = ['월', '화', '수', '목', '금', '토', '일'].map(d => `<div style="font-size:11px;font-weight:800;color:var(--muted);">${d}</div>`).join('');
+  for (let i = 0; i < offset; i++) cells += '<div></div>';
+  for (let day = 1; day <= lastDate; day++) {
+    const k = `${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const stamped = !!state.stamps[k];
+    const evs = byDay[k] || [];
+    const dots = evs.slice(0, 3).map(e => ` <span class="cal-dot ${e.isDday ? 'dday' : ''}"></span>`).join('');
+    cells += `<div class="cal-cell ${stamped ? 'stamped' : ''} ${evs.length ? 'has-event' : ''} ${k === tk ? 'today-cell' : ''}" onclick="openDayDetail('${k}')">
+      <span>${day}</span>
+      <span style="font-size:10px;">${stamped ? '🐾' : ''}</span>
+      <div class="cal-dots">${dots}</div>
+    </div>`;
+  }
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">🗓 ${y}년 ${m}월</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div style="display:flex; gap:6px; align-items:center; justify-content:space-between; margin-bottom:6px;">
+      <button class="btn btn-sm" onclick="openMonthCalendar('${ymOf(prev)}')">‹ 이전</button>
+      <span class="date-sub" style="margin:0;">날짜를 누르면 그날 일정을 봐요</span>
+      <button class="btn btn-sm" onclick="openMonthCalendar('${ymOf(next)}')">다음 ›</button>
+    </div>
+    <div class="cal-grid">${cells}</div>
+    <div class="stamp-footer" style="margin-top:10px;">
+      <span class="badge badge-gray">🐾 도장</span>
+      <span class="badge" style="background:#FFF8EE;color:#B45309;border-color:#F6C99B;">🟠 일정</span>
+      <span class="badge" style="background:#FFF0F0;color:#C53030;border-color:#F3B7B7;">🔴 D-Day</span>
+    </div>
+    <button class="btn btn-full btn-blue" style="margin-top:10px;" onclick="openEventModal(null, '${tk}')">+ 이번 달 일정 추가</button>
+  `);
+}
+
+function openDayDetail(k) {
+  const evs = (state.events || []).filter(e => e.date === k).sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">📌 ${escapeHtml(dateKo(k))}</h2>
+      <button class="btn btn-sm" onclick="openMonthCalendar()">‹ 달력</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:6px; margin:8px 0 10px;">
+      ${evs.length ? evs.map(e => `<div class="day-detail-item">
+        <span style="min-width:0;">${e.isDday ? '🎯 ' : ''}${escapeHtml(e.title)}
+          <span class="member-sub" style="display:block;">${e.time ? escapeHtml(e.time) + ' · ' : ''}${escapeHtml(e.category || '가족')} · ${escapeHtml(eventMemberLabel(e.memberId))}</span>
+        </span>
+        <button class="mini-icon-btn" onclick="openEventModal('${e.id}')">✏️</button>
+      </div>`).join('') : '<div class="empty-hint">이 날은 일정이 없어요.</div>'}
+    </div>
+    <button class="btn btn-full btn-green" onclick="openEventModal(null, '${k}')">+ ${escapeHtml(dateKo(k))} 일정 추가</button>
+  `);
+}
+
+/* 옛 도장판 버튼도 같은 달력으로 연결 */
+function openStampCalendar() { openMonthCalendar(); }
+
+/* ---------- 학교 급식 (나이스 Open API) ---------- */
+const MEAL = { rows: null, cacheKey: null, loading: false, error: null, selected: null, showAllergy: false };
+
+function neisRows(json, key) {
+  const block = json && json[key];
+  if (!Array.isArray(block)) return [];
+  const holder = block.find(b => Array.isArray(b.row));
+  return holder ? holder.row : [];
+}
+
+function parseDishes(ddish) {
+  return String(ddish || '')
+    .split('<br/>').join('\n').split('<br>').join('\n').split('\n')
+    .map(s => s.trim()).filter(Boolean)
+    .map(raw => {
+      const m = raw.match(/\(([\d.\s]+)\)\s*$/);
+      const allergy = m ? m[1].replace(/[^\d.]/g, '').replace(/\.+$/, '').replace(/\.{2,}/g, '.') : '';
+      const name = raw.replace(/\s*\([\d.\s]+\)\s*$/, '').trim();
+      return { name: name || raw, allergy };
+    });
+}
+
+function currentWeekDays() {
+  const now = new Date();
+  const day = now.getDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const out = [];
+  for (let i = 0; i < 7; i++) { const d = new Date(now); d.setDate(now.getDate() + mondayOffset + i); out.push(d); }
+  return out;
+}
+
+async function loadMeals(force) {
+  const s = state.school || {};
+  if (!s.schoolCode || !s.officeCode) { MEAL.rows = null; renderMeals(); return; }
+  const days = currentWeekDays();
+  const from = todayKey(days[0]).replace(/-/g, '');
+  const to = todayKey(days[6]).replace(/-/g, '');
+  const cacheKey = `${s.officeCode}|${s.schoolCode}|${from}`;
+  if (!force && MEAL.rows && MEAL.cacheKey === cacheKey) { renderMeals(); return; }
+  if (MEAL.loading) return;
+  MEAL.loading = true;
+  MEAL.error = null;
+  const box = document.getElementById('mealToday');
+  if (box) box.innerHTML = '<div class="empty-hint">급식 정보를 불러오는 중...</div>';
+  try {
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&pIndex=1&pSize=100&ATPT_OFCDC_SC_CODE=${encodeURIComponent(s.officeCode)}&SD_SCHUL_CODE=${encodeURIComponent(s.schoolCode)}&MLSV_FROM_YMD=${from}&MLSV_TO_YMD=${to}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    MEAL.rows = neisRows(json, 'mealServiceDietInfo').map(r => {
+      const ymd = String(r.MLSV_YMD || '');
+      return {
+        date: `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`,
+        type: r.MMEAL_SC_NM || '급식',
+        typeCode: r.MMEAL_SC_CODE || '2',
+        dishes: parseDishes(r.DDISH_NM),
+        kcal: r.CAL_INFO || ''
+      };
+    });
+    MEAL.cacheKey = cacheKey;
+  } catch (err) {
+    MEAL.error = '급식 정보를 불러오지 못했어요 (연결을 확인해주세요)';
+  } finally {
+    MEAL.loading = false;
+  }
+  renderMeals();
+}
+
+function mealTypeHtml(r) {
+  return `<div class="meal-type">
+    <div class="meal-type-head">
+      <span class="meal-type-name">🍚 ${escapeHtml(r.type)}</span>
+      <span class="meal-kcal">${escapeHtml(r.kcal)}</span>
+    </div>
+    <div class="meal-dishes">
+      ${r.dishes.map(d => `<div class="meal-dish">
+        <span>${escapeHtml(d.name)}</span>
+        ${MEAL.showAllergy && d.allergy ? `<span class="allergy-tag">${escapeHtml(d.allergy)}</span>` : ''}
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function selectMealDay(k) { MEAL.selected = k; renderMeals(); }
+
+function toggleAllergy() {
+  MEAL.showAllergy = !MEAL.showAllergy;
+  const btn = document.getElementById('allergyToggleBtn');
+  if (btn) btn.textContent = MEAL.showAllergy ? '알레르기 번호 숨기기' : '알레르기 번호 보기';
+  renderMeals();
+}
+
+function renderMeals() {
+  const s = state.school || {};
+  const line = document.getElementById('mealSchoolLine');
+  if (line) {
+    line.textContent = s.schoolCode
+      ? `${s.name || '학교'} · 나이스 급식 정보`
+      : '아직 학교가 연결되지 않았어요 (아래에서 검색해 연결할 수 있어요)';
+  }
+  const btn = document.getElementById('allergyToggleBtn');
+  if (btn) btn.textContent = MEAL.showAllergy ? '알레르기 번호 숨기기' : '알레르기 번호 보기';
+
+  const box = document.getElementById('mealToday');
+  if (box) {
+    if (!s.schoolCode) {
+      box.innerHTML = `<div class="empty-hint">🍱 학교를 연결하면 오늘 급식이 여기에 보여요.<br/>
+        <button class="btn btn-sm btn-blue" style="margin-top:8px;" onclick="openSchoolSearch()">🏫 학교 검색해서 연결하기</button></div>`;
+    } else if (MEAL.loading && !MEAL.rows) {
+      box.innerHTML = '<div class="empty-hint">급식 정보를 불러오는 중...</div>';
+    } else if (MEAL.error && !MEAL.rows) {
+      box.innerHTML = `<div class="empty-hint">⚠️ ${escapeHtml(MEAL.error)}<br/>
+        <button class="btn btn-sm" style="margin-top:8px;" onclick="loadMeals(true)">다시 시도</button></div>`;
+    } else {
+      const tk = todayKey();
+      const todays = (MEAL.rows || []).filter(r => r.date === tk);
+      box.innerHTML = todays.length
+        ? todays.map(mealTypeHtml).join('')
+        : '<div class="empty-hint">오늘은 급식 정보가 없어요 (주말·휴업·시험기간)</div>';
+    }
+  }
+
+  const tabs = document.getElementById('mealDayTabs');
+  const body = document.getElementById('mealWeekBody');
+  const weekBadge = document.getElementById('mealWeekBadge');
+  if (!tabs || !body) return;
+  const days = currentWeekDays();
+  const keys = days.map(d => todayKey(d));
+  const has = k => (MEAL.rows || []).some(r => r.date === k);
+  if (!MEAL.selected || !keys.includes(MEAL.selected)) {
+    MEAL.selected = has(todayKey()) ? todayKey() : (keys.find(has) || keys[0]);
+  }
+  if (weekBadge) {
+    const from = days[0], to = days[6];
+    weekBadge.textContent = `${from.getMonth() + 1}/${from.getDate()}~${to.getMonth() + 1}/${to.getDate()}`;
+  }
+  tabs.innerHTML = days.map((d, i) => {
+    const k = keys[i];
+    return `<button class="meal-day-tab ${MEAL.selected === k ? 'active' : ''} ${has(k) ? '' : 'empty'}" onclick="selectMealDay('${k}')">
+      ${WEEKDAY_KO[d.getDay()]}<br/><span style="font-size:10px;font-weight:700;">${d.getDate()}일</span></button>`;
+  }).join('');
+  const rows = (MEAL.rows || []).filter(r => r.date === MEAL.selected);
+  body.innerHTML = rows.length
+    ? rows.map(mealTypeHtml).join('')
+    : '<div class="empty-hint">이 날은 급식 정보가 없어요 (방학·휴업일 수 있어요)</div>';
+}
+
+function openSchoolSearch() {
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">🏫 학교 찾기</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <p class="card-desc">나이스 교육정보 개방 포털에서 학교를 찾아 연결해요. 연결한 학교는 가족 모두에게 함께 보여요.</p>
+    <div style="display:flex; gap:6px;">
+      <input type="text" id="schoolQuery" placeholder="학교 이름 (예: 경명여자중학교)" onkeydown="if(event.key==='Enter') searchSchool()" />
+      <button class="btn btn-blue" onclick="searchSchool()">검색</button>
+    </div>
+    <div class="date-sub" style="margin-top:8px;">지금 연결된 학교: <b>${escapeHtml((state.school && state.school.name) || '없음')}</b></div>
+    <div id="schoolResults" style="margin-top:10px;"></div>
+  `);
+  const input = document.getElementById('schoolQuery');
+  if (input) input.value = (state.school && state.school.name) || '';
+}
+
+let SCHOOL_HITS = [];
+
+async function searchSchool() {
+  const q = (document.getElementById('schoolQuery')?.value || '').trim();
+  const out = document.getElementById('schoolResults');
+  if (!q || !out) return;
+  out.innerHTML = '<div class="empty-hint">검색 중...</div>';
+  try {
+    const url = `https://open.neis.go.kr/hub/schoolInfo?Type=json&pIndex=1&pSize=30&SCHUL_NM=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    const rows = neisRows(json, 'schoolInfo');
+    SCHOOL_HITS = rows.map(r => ({
+      officeCode: r.ATPT_OFCDC_SC_CODE,
+      schoolCode: r.SD_SCHUL_CODE,
+      name: r.SCHUL_NM,
+      office: r.ATPT_OFCDC_SC_NM || '',
+      kind: r.SCHUL_KND_SC_NM || '',
+      region: r.LCTN_SC_NM || ''
+    }));
+    if (!SCHOOL_HITS.length) { out.innerHTML = '<div class="empty-hint">검색 결과가 없어요. 학교 이름을 다르게 적어보세요.</div>'; return; }
+    out.innerHTML = `<div class="item-list">${SCHOOL_HITS.map((s, idx) => `
+      <button class="day-detail-item" style="width:100%;text-align:left;" onclick="selectSchoolByIndex(${idx})">
+        <span style="min-width:0;">
+          <span style="display:block;font-weight:800;">${escapeHtml(s.name)}</span>
+          <span class="member-sub" style="display:block;">${escapeHtml(s.office)} · ${escapeHtml(s.kind)} · ${escapeHtml(s.region)}</span>
+        </span>
+        <span class="badge badge-blue">연결</span>
+      </button>`).join('')}</div>`;
+  } catch (err) {
+    out.innerHTML = '<div class="empty-hint">검색에 실패했어요. 잠시 후 다시 시도해주세요.</div>';
+  }
+}
+
+function selectSchoolByIndex(idx) {
+  const s = SCHOOL_HITS[idx];
+  if (!s) return;
+  selectSchool(s.officeCode, s.schoolCode, s.name);
+}
+
+function selectSchool(officeCode, schoolCode, name) {
+  state.school = { officeCode, schoolCode, name };
+  saveState();
+  MEAL.rows = null;
+  MEAL.cacheKey = null;
+  MEAL.selected = null;
+  closeModal();
+  renderMeals();
+  loadMeals(true);
+  showCoinToast(`🏫 ${name} 급식을 연결했어요`);
+}
+
+/* ---------- 키 · 몸무게 · BMI ---------- */
+const GROWTH_UI = { member: 'all', metric: 'height' };
+
+function bmiOf(h, w) {
+  if (!h || !w || h <= 0 || w <= 0) return null;
+  const m = h / 100;
+  return Math.round((w / (m * m)) * 10) / 10;
+}
+function bmiLabel(bmi) {
+  if (bmi === null || bmi === undefined || isNaN(Number(bmi))) return null;
+  const v = Number(bmi);
+  if (v < 18.5) return { text: '저체중', cls: 'bmi-low' };
+  if (v < 23) return { text: '정상', cls: 'bmi-ok' };
+  if (v < 25) return { text: '과체중', cls: 'bmi-over' };
+  return { text: '비만', cls: 'bmi-obese' };
+}
+function growthOf(memberId) {
+  return (state.growth || []).filter(g => memberId === 'all' || g.memberId === memberId)
+    .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+
+function setGrowthMetric(metric) {
+  GROWTH_UI.metric = metric;
+  ['height', 'weight', 'bmi'].forEach(k => {
+    const el = document.getElementById('gm' + k.charAt(0).toUpperCase() + k.slice(1));
+    if (el) el.classList.toggle('active', k === metric);
+  });
+  renderGrowth();
+}
+function setGrowthMember(memberId) {
+  GROWTH_UI.member = memberId;
+  renderGrowth();
+}
+
+function renderGrowth() {
+  const chips = document.getElementById('growthMemberChips');
+  if (!chips) return;
+  chips.innerHTML = [`<button class="chip-btn ${GROWTH_UI.member === 'all' ? 'active' : ''}" onclick="setGrowthMember('all')">전체</button>`]
+    .concat((state.members || []).map(m => `<button class="chip-btn ${GROWTH_UI.member === m.id ? 'active' : ''}" onclick="setGrowthMember('${m.id}')">${escapeHtml(m.avatar + ' ' + m.name)}</button>`))
+    .join('');
+
+  const members = GROWTH_UI.member === 'all' ? (state.members || []) : (state.members || []).filter(m => m.id === GROWTH_UI.member);
+  const latestCards = members.map(m => {
+    const rec = growthOf(m.id)[0];
+    if (!rec) return '';
+    const label = bmiLabel(rec.bmi);
+    return `<div class="growth-card">
+      <div class="growth-card-name">${escapeHtml(m.avatar + ' ' + m.name)}</div>
+      <div class="growth-card-big">${rec.height != null ? Number(rec.height).toFixed(1) + 'cm' : '—'}</div>
+      <div class="growth-card-sub">${rec.weight != null ? Number(rec.weight).toFixed(1) + 'kg' : '몸무게 —'}</div>
+      <div class="growth-card-sub">${label ? `<span class="bmi-tag ${label.cls}">BMI ${Number(rec.bmi).toFixed(1)} ${label.text}</span>` : 'BMI —'}</div>
+      <div class="growth-card-sub" style="margin-top:3px;">${escapeHtml(rec.date || '')}</div>
+    </div>`;
+  }).join('');
+  const latestBox = document.getElementById('growthLatestCards');
+  if (latestBox) latestBox.innerHTML = latestCards || '<div class="empty-hint">아직 기록이 없어요. “+ 기록 추가”로 첫 기록을 남겨보세요.</div>';
+
+  renderGrowthChart();
+
+  const list = document.getElementById('growthList');
+  if (list) {
+    const rows = growthOf(GROWTH_UI.member);
+    list.innerHTML = rows.length ? rows.map(g => {
+      const m = memberById(g.memberId);
+      const label = bmiLabel(g.bmi);
+      return `<div class="task-item">
+        <div style="min-width:0;">
+          <div class="task-title">${escapeHtml(g.date || '')} · ${m ? escapeHtml(m.avatar + ' ' + m.name) : '구성원'}</div>
+          <div class="task-meta">
+            <span class="chip">📏 ${g.height != null ? Number(g.height).toFixed(1) + 'cm' : '—'}</span>
+            <span class="chip">⚖️ ${g.weight != null ? Number(g.weight).toFixed(1) + 'kg' : '—'}</span>
+            ${label ? `<span class="chip" style="background:#F3EEFF;color:#6B46C1;">BMI ${Number(g.bmi).toFixed(1)} ${label.text}</span>` : ''}
+            ${g.memo ? `<span class="chip">${escapeHtml(g.memo)}</span>` : ''}
+          </div>
+        </div>
+        <div class="task-btns">
+          <button class="mini-icon-btn" onclick="deleteGrowth('${g.id}')">✕</button>
+        </div>
+      </div>`;
+    }).join('') : '<div class="empty-hint">아직 기록이 없어요.</div>';
+  }
+}
+
+function renderGrowthChart() {
+  const wrap = document.getElementById('growthChart');
+  if (!wrap) return;
+  const metric = GROWTH_UI.metric;
+  const field = metric; // height | weight | bmi
+  const unit = metric === 'height' ? 'cm' : metric === 'weight' ? 'kg' : 'BMI';
+  const members = GROWTH_UI.member === 'all' ? (state.members || []) : (state.members || []).filter(m => m.id === GROWTH_UI.member);
+  const colors = ['#F4A261', '#3182CE', '#38A169', '#805AD5', '#D53F8C'];
+  const series = members.map((m, i) => ({
+    member: m,
+    color: colors[i % colors.length],
+    points: (state.growth || [])
+      .filter(g => g.memberId === m.id && g[field] !== null && g[field] !== undefined && g[field] !== '' && !isNaN(Number(g[field])))
+      .map(g => ({ date: String(g.date || ''), value: Number(g[field]) }))
+      .sort((a, b) => a.date.localeCompare(b.date))
+  })).filter(s => s.points.length);
+
+  if (!series.length) {
+    wrap.innerHTML = '<div class="empty-hint">그래프로 볼 기록이 아직 없어요.</div>';
+    return;
+  }
+
+  const W = 320, H = 170, P = { top: 14, right: 12, bottom: 24, left: 38 };
+  const values = series.flatMap(s => s.points.map(p => p.value));
+  let minV = Math.min(...values), maxV = Math.max(...values);
+  if (maxV - minV < 1) { minV -= 1; maxV += 1; }
+  else { const pad = (maxV - minV) * 0.15; minV -= pad; maxV += pad; }
+  const dates = series.flatMap(s => s.points.map(p => p.date)).sort();
+  const minD = parseDateKey(dates[0]).getTime();
+  const maxD = parseDateKey(dates[dates.length - 1]).getTime();
+  const px = t => (maxD === minD ? (P.left + (W - P.left - P.right) / 2) : P.left + ((t - minD) / (maxD - minD)) * (W - P.left - P.right));
+  const py = v => P.top + (1 - (v - minV) / (maxV - minV)) * (H - P.top - P.bottom);
+
+  let grid = '';
+  for (let i = 0; i <= 2; i++) {
+    const v = minV + (maxV - minV) * (i / 2);
+    const yv = py(v).toFixed(1);
+    grid += `<line x1="${P.left}" y1="${yv}" x2="${W - P.right}" y2="${yv}" stroke="#EFE7CF" stroke-width="1" stroke-dasharray="3 4" />`;
+    grid += `<text x="${P.left - 5}" y="${(Number(yv) + 3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#8A7E6B">${Math.round(v)}</text>`;
+  }
+  const fmtShort = k => `${Number(k.slice(5, 7))}.${Number(k.slice(8, 10))}`;
+  grid += `<text x="${P.left}" y="${H - 6}" text-anchor="start" font-size="8.5" fill="#8A7E6B">${fmtShort(dates[0])}</text>`;
+  if (dates.length > 1) grid += `<text x="${W - P.right}" y="${H - 6}" text-anchor="end" font-size="8.5" fill="#8A7E6B">${fmtShort(dates[dates.length - 1])}</text>`;
+
+  const lines = series.map(s => {
+    const pts = s.points.map(p => `${px(parseDateKey(p.date).getTime()).toFixed(1)},${py(p.value).toFixed(1)}`);
+    const poly = s.points.length > 1
+      ? `<polyline points="${pts.join(' ')}" fill="none" stroke="${s.color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" />`
+      : '';
+    const dots = s.points.map((p, idx) => `<circle cx="${pts[idx].split(',')[0]}" cy="${pts[idx].split(',')[1]}" r="3" fill="#FFF" stroke="${s.color}" stroke-width="2" />`).join('');
+    return poly + dots;
+  }).join('');
+
+  const legend = series.length > 1
+    ? `<div class="chart-legend">${series.map(s => `<span><span class="legend-dot" style="background:${s.color}"></span>${escapeHtml(s.member.name)}</span>`).join('')}</div>`
+    : `<div class="chart-legend">${escapeHtml(series[0].member.name)} · ${unit} 추이</div>`;
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="auto" role="img" aria-label="${escapeHtml(unit)} 추이 그래프" style="display:block;">${grid}${lines}</svg>${legend}`;
+}
+
+function openGrowthModal() {
+  const memberOpts = (state.members || []).map(m => `<option value="${m.id}" ${GROWTH_UI.member === m.id ? 'selected' : ''}>${escapeHtml(m.avatar + ' ' + m.name)}</option>`).join('');
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">📏 성장 기록 추가</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <select id="grMember">${memberOpts}</select>
+      <input type="date" id="grDate" value="${todayKey()}" />
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">키 (cm)</label><input type="number" id="grHeight" step="0.1" inputmode="decimal" placeholder="165.5" oninput="updateBmiPreview()" /></div>
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">몸무게 (kg)</label><input type="number" id="grWeight" step="0.1" inputmode="decimal" placeholder="52.3" oninput="updateBmiPreview()" /></div>
+      </div>
+      <div class="outfit-line" id="bmiPreview">⚖️ BMI는 자동으로 계산돼요</div>
+      <input type="text" id="grMemo" placeholder="메모 (예: 보건실 측정)" />
+      <div class="btn-row" style="margin-top:4px;">
+        <button class="btn" onclick="closeModal()">취소</button>
+        <button class="btn btn-green" onclick="saveGrowth()">저장하기</button>
+      </div>
+    </div>
+  `);
+}
+
+function updateBmiPreview() {
+  const h = Number(document.getElementById('grHeight')?.value);
+  const w = Number(document.getElementById('grWeight')?.value);
+  const bmi = bmiOf(h, w);
+  const box = document.getElementById('bmiPreview');
+  if (!box) return;
+  const label = bmiLabel(bmi);
+  box.textContent = bmi === null ? '⚖️ BMI는 자동으로 계산돼요' : `⚖️ BMI ${bmi.toFixed(1)} · ${label.text}`;
+}
+
+function saveGrowth() {
+  const memberId = document.getElementById('grMember').value;
+  const date = document.getElementById('grDate').value || todayKey();
+  const h = Number(document.getElementById('grHeight').value) || null;
+  const w = Number(document.getElementById('grWeight').value) || null;
+  if (!h && !w) { showCoinToast('⚠️ 키나 몸무게 중 하나는 적어주세요'); return; }
+  const bmi = bmiOf(h, w);
+  state.growth = state.growth || [];
+  state.growth.push({ id: 'gr' + Date.now(), memberId, date, height: h, weight: w, bmi, memo: (document.getElementById('grMemo').value || '').trim() });
+  saveState();
+  closeModal();
+  GROWTH_UI.member = memberId;
+  renderGrowth();
+  showCoinToast('🌱 성장 기록을 저장했어요');
+}
+
+function deleteGrowth(id) {
+  if (!confirm('이 성장 기록을 지울까요?')) return;
+  state.growth = (state.growth || []).filter(g => g.id !== id);
+  saveState();
+  renderGrowth();
+  showCoinToast('🗑️ 기록을 지웠어요');
+}
+
+/* ---------- 학원 · 학교 숙제 ---------- */
+function dueInfo(dueDate) {
+  if (!dueDate) return null;
+  const diff = dayDiffFromToday(dueDate);
+  if (diff < 0) return { text: `${Math.abs(diff)}일 지남`, cls: 'late' };
+  if (diff === 0) return { text: '오늘 마감', cls: 'today' };
+  return { text: 'D-' + diff, cls: '' };
+}
+
+function sortedHomeworks() {
+  return (state.homeworks || [])
+    .map((h, i) => ({ h, i }))
+    .sort((a, b) => {
+      if (!!a.h.done !== !!b.h.done) return a.h.done ? 1 : -1;
+      const da = a.h.dueDate || '9999-12-31';
+      const db = b.h.dueDate || '9999-12-31';
+      if (da !== db) return da.localeCompare(db);
+      return (Number(a.h.position) || a.i) - (Number(b.h.position) || b.i);
+    })
+    .map(o => o.h);
+}
+
+function renderHomeworks() {
+  const list = document.getElementById('homeworkList');
+  const badge = document.getElementById('hwCountBadge');
+  const items = sortedHomeworks();
+  const left = items.filter(h => !h.done).length;
+  if (badge) badge.textContent = `${left}개 남음`;
+  if (!list) return;
+  list.innerHTML = items.length ? items.map(h => {
+    const m = memberById(h.memberId);
+    const due = dueInfo(h.dueDate);
+    return `<div class="hw-item ${h.done ? 'done' : ''}">
+      <div class="hw-left" onclick="toggleHomework('${h.id}')">
+        <div class="chk" style="${h.done ? 'background:#38A169;border-color:#38A169;' : ''}">${h.done ? '✓' : ''}</div>
+        <div style="min-width:0;">
+          <div class="hw-title">${escapeHtml(h.title)}</div>
+          <div class="hw-meta">
+            ${h.subject ? `<span class="chip">${escapeHtml(h.subject)}</span>` : ''}
+            ${due ? `<span class="due-pill ${due.cls}">${due.text}</span>` : ''}
+            <span class="chip">${m ? escapeHtml(m.avatar + ' ' + m.name) : '👨‍👩‍👧 가족 모두'}</span>
+            ${h.source === 'pickle' ? '<span class="src-pickle">✨ 초파가 넣음</span>' : ''}
+          </div>
+        </div>
+      </div>
+      <div class="task-btns">
+        <button class="mini-icon-btn" onclick="deleteHomework('${h.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="empty-hint">아직 숙제가 없어요.<br/>학원 숙제를 적어두면 마감일까지 셈해드려요.</div>';
+}
+
+function toggleHomework(id) {
+  const h = (state.homeworks || []).find(x => x.id === id);
+  if (!h) return;
+  h.done = !h.done;
+  if (h.done) {
+    stampToday();
+    playChime(760);
+    showCoinToast('✅ 숙제 완료!');
+  }
+  saveState();
+  renderHomeworks();
+  renderStamps();
+}
+
+function openHomeworkModal() {
+  const memberOpts = `<option value="all">가족 모두</option>` + (state.members || []).map(m => `<option value="${m.id}">${escapeHtml(m.avatar + ' ' + m.name)}</option>`).join('');
+  openModal(`
+    <div class="card-head">
+      <h2 class="card-title">📝 숙제 추가</h2>
+      <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <input type="text" id="hwSubject" placeholder="과목 (예: 수학, 영어)" />
+      <input type="text" id="hwTitle" placeholder="숙제 내용 (예: 익힘책 32~35쪽)" />
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">마감일</label><input type="date" id="hwDue" value="${todayKey()}" /></div>
+        <div><label style="font-size:11.5px;font-weight:700;color:var(--muted);">담당</label><select id="hwMember">${memberOpts}</select></div>
+      </div>
+      <div class="btn-row" style="margin-top:4px;">
+        <button class="btn" onclick="closeModal()">취소</button>
+        <button class="btn btn-green" onclick="saveHomework()">추가하기</button>
+      </div>
+    </div>
+  `);
+}
+
+function saveHomework() {
+  const title = (document.getElementById('hwTitle')?.value || '').trim();
+  if (!title) { showCoinToast('⚠️ 숙제 내용을 적어주세요'); return; }
+  state.homeworks = state.homeworks || [];
+  state.homeworks.push({
+    id: 'hw' + Date.now(),
+    memberId: document.getElementById('hwMember').value || 'all',
+    subject: (document.getElementById('hwSubject').value || '').trim(),
+    title,
+    dueDate: document.getElementById('hwDue').value || '',
+    done: false,
+    source: 'manual',
+    position: state.homeworks.length
+  });
+  saveState();
+  closeModal();
+  renderHomeworks();
+  showCoinToast('📝 숙제를 추가했어요');
+}
+
+function deleteHomework(id) {
+  if (!confirm('이 숙제를 지울까요?')) return;
+  state.homeworks = (state.homeworks || []).filter(h => h.id !== id);
+  saveState();
+  renderHomeworks();
+}
+
 /* Settings & Export */
 function openSettings() {
   openModal(`
@@ -1888,6 +2998,14 @@ function openSettings() {
       <div>
         <label style="font-size:12px;font-weight:700;">동네 이름 (날씨 표시용)</label>
         <input type="text" id="setCityName" value="${escapeHtml(state.city.name)}" />
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:700;">급식 학교 (나이스)</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" id="setSchoolName" value="${escapeHtml((state.school && state.school.name) || '')}" placeholder="경명여자중학교" readonly />
+          <button class="btn btn-sm btn-blue" onclick="openSchoolSearch()">🔍 학교 검색</button>
+        </div>
+        <div class="date-sub">바꾸면 오늘·이번 주 급식이 새 학교 기준으로 불러와져요.</div>
       </div>
       <div>
         <label style="font-size:12px;font-weight:700;">구성원 이름 / 이모지</label>
@@ -1976,7 +3094,7 @@ function normalizeRoomCode(input) {
 const ROOM_ID = normalizeRoomCode(localStorage.getItem(ROOM_STORAGE_KEY)) || DEFAULT_ROOM_ID;
 
 const SYNC_TABLES = {
-  rooms:         { table: 'family_rooms',         pk: ['room_id'], fields: ['room_id','app_name','app_logo','city_name','city_lat','city_lon','start_money','alarm_enabled','alarm_time','alarm_last_fired_date','mission_index','mission_done_date','mission_total_count','last_study_reset_date'] },
+  rooms:         { table: 'family_rooms',         pk: ['room_id'], fields: ['room_id','app_name','app_logo','city_name','city_lat','city_lon','start_money','alarm_enabled','alarm_time','alarm_last_fired_date','mission_index','mission_done_date','mission_total_count','last_study_reset_date','school_office_code','school_code','school_name'] },
   members:       { table: 'family_members',       pk: ['room_id','id'], fields: ['room_id','id','name','role','avatar','mascot','position'] },
   todos:         { table: 'family_todos',         pk: ['room_id','id'], fields: ['room_id','id','member_id','title','done','position'] },
   studies:       { table: 'family_studies',       pk: ['room_id','id'], fields: ['room_id','id','title','detail','reward','pinned','done','position'] },
@@ -1984,9 +3102,12 @@ const SYNC_TABLES = {
   study_logs:    { table: 'family_study_logs',    pk: ['room_id','log_date'], fields: ['room_id','log_date','count','amount'] },
   stamps:        { table: 'family_stamps',        pk: ['room_id','stamp_date'], fields: ['room_id','stamp_date','stamped'] },
   chat_messages: { table: 'family_chat_messages', pk: ['room_id','id'], fields: ['room_id','id','sender_id','type','text','audio','time_label','hearts','seq'] },
-  allowance_tx:  { table: 'family_allowance_tx',  pk: ['room_id','id'], fields: ['room_id','id','tx_date','type','amount','memo','seq'] }
+  allowance_tx:  { table: 'family_allowance_tx',  pk: ['room_id','id'], fields: ['room_id','id','tx_date','type','amount','memo','seq'] },
+  events:        { table: 'family_events',        pk: ['room_id','id'], fields: ['room_id','id','title','event_date','event_time','member_id','category','memo','is_dday'] },
+  growth:        { table: 'family_growth',        pk: ['room_id','id'], fields: ['room_id','id','member_id','record_date','height_cm','weight_kg','bmi','memo'] },
+  homeworks:     { table: 'family_homeworks',     pk: ['room_id','id'], fields: ['room_id','id','member_id','subject','title','due_date','done','source','position'] }
 };
-const SYNC_ORDER = ['rooms','members','todos','studies','missions','study_logs','stamps','chat_messages','allowance_tx'];
+const SYNC_ORDER = ['rooms','members','todos','studies','missions','study_logs','stamps','chat_messages','allowance_tx','events','growth','homeworks'];
 
 const SYNC = {
   client: null,
@@ -2080,7 +3201,10 @@ function buildRows() {
     mission_index: Number(state.missionIndex) || 0,
     mission_done_date: state.missionDoneDate || null,
     mission_total_count: Number(state.missionTotalCount) || 0,
-    last_study_reset_date: state.lastStudyResetDate || null
+    last_study_reset_date: state.lastStudyResetDate || null,
+    school_office_code: (state.school && state.school.officeCode) || '',
+    school_code: (state.school && state.school.schoolCode) || '',
+    school_name: (state.school && state.school.name) || ''
   });
 
   (state.members || []).forEach((m, i) => out.members.push({
@@ -2130,6 +3254,29 @@ function buildRows() {
     seq: Number(t.seq) || (i + 1)
   }));
 
+  (state.events || []).forEach(e => out.events.push({
+    room_id: rid, id: e.id, title: e.title || '',
+    event_date: e.date || todayKey(), event_time: e.time || '',
+    member_id: e.memberId || 'all', category: e.category || '가족',
+    memo: e.memo || '', is_dday: !!e.isDday
+  }));
+
+  (state.growth || []).forEach(g => out.growth.push({
+    room_id: rid, id: g.id, member_id: g.memberId || 'all',
+    record_date: g.date || todayKey(),
+    height_cm: (g.height === null || g.height === undefined || g.height === '') ? null : Number(g.height),
+    weight_kg: (g.weight === null || g.weight === undefined || g.weight === '') ? null : Number(g.weight),
+    bmi: (g.bmi === null || g.bmi === undefined || g.bmi === '') ? null : Number(g.bmi),
+    memo: g.memo || ''
+  }));
+
+  (state.homeworks || []).forEach((h, i) => out.homeworks.push({
+    room_id: rid, id: h.id, member_id: h.memberId || 'all',
+    subject: h.subject || '', title: h.title || '',
+    due_date: h.dueDate || '', done: !!h.done,
+    source: h.source || 'manual', position: Number.isFinite(Number(h.position)) ? Number(h.position) : i
+  }));
+
   return out;
 }
 
@@ -2160,6 +3307,11 @@ function applyServerData(data) {
   next.missionDoneDate = room.mission_done_date || null;
   next.missionTotalCount = Number(room.mission_total_count) || 0;
   next.lastStudyResetDate = room.last_study_reset_date || next.lastStudyResetDate;
+  next.school = {
+    officeCode: room.school_office_code || next.school.officeCode,
+    schoolCode: room.school_code || next.school.schoolCode,
+    name: room.school_name || next.school.name
+  };
 
   next.members = sortByPosition(data.members || []).map(m => ({
     id: m.id, name: m.name, role: m.role || '', avatar: m.avatar || '', mascot: m.mascot || ''
@@ -2213,6 +3365,27 @@ function applyServerData(data) {
       id: t.id, date: t.tx_date, type: t.type,
       amount: Number(t.amount) || 0, memo: t.memo || '', seq: Number(t.seq) || 0
     }));
+
+  next.events = (data.events || []).map(e => ({
+    id: e.id, title: e.title, date: e.event_date, time: e.event_time || '',
+    memberId: e.member_id || 'all', category: e.category || '가족',
+    memo: e.memo || '', isDday: !!e.is_dday
+  }));
+
+  next.growth = (data.growth || []).map(g => ({
+    id: g.id, memberId: g.member_id,
+    date: g.record_date,
+    height: (g.height_cm === null ? null : Number(g.height_cm)),
+    weight: (g.weight_kg === null ? null : Number(g.weight_kg)),
+    bmi: (g.bmi === null ? null : Number(g.bmi)),
+    memo: g.memo || ''
+  }));
+
+  next.homeworks = sortByPosition(data.homeworks || []).map(h => ({
+    id: h.id, memberId: h.member_id || 'all', subject: h.subject || '',
+    title: h.title, dueDate: h.due_date || '', done: !!h.done,
+    source: h.source || 'manual', position: Number(h.position) || 0
+  }));
 
   if (!next.members.some(m => m.id === next.chat.activeMemberId) && next.members[0]) {
     next.chat.activeMemberId = next.members[0].id;
@@ -2336,6 +3509,11 @@ function applyRowEvent(table, payload) {
     state.missionDoneDate = row.mission_done_date || null;
     state.missionTotalCount = Number(row.mission_total_count) || 0;
     state.lastStudyResetDate = row.last_study_reset_date || state.lastStudyResetDate;
+    state.school = {
+      officeCode: row.school_office_code || state.school.officeCode,
+      schoolCode: row.school_code || state.school.schoolCode,
+      name: row.school_name || state.school.name
+    };
     return;
   }
 
@@ -2446,6 +3624,48 @@ function applyRowEvent(table, payload) {
     state.ledger.transactions = list.sort((a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0));
     return;
   }
+
+  if (table === 'events') {
+    const list = (state.events || []).filter(e => e.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, title: row.title, date: row.event_date, time: row.event_time || '',
+      memberId: row.member_id || 'all', category: row.category || '가족',
+      memo: row.memo || '', isDday: !!row.is_dday
+    });
+    state.events = list;
+    return;
+  }
+
+  if (table === 'growth') {
+    const list = (state.growth || []).filter(g => g.id !== row.id);
+    if (!gone) list.push({
+      id: row.id, memberId: row.member_id, date: row.record_date,
+      height: (row.height_cm === null ? null : Number(row.height_cm)),
+      weight: (row.weight_kg === null ? null : Number(row.weight_kg)),
+      bmi: (row.bmi === null ? null : Number(row.bmi)),
+      memo: row.memo || ''
+    });
+    state.growth = list;
+    return;
+  }
+
+  if (table === 'homeworks') {
+    const list = (state.homeworks || []).slice();
+    const idx = list.findIndex(h => h.id === row.id);
+    if (gone) {
+      if (idx >= 0) list.splice(idx, 1);
+    } else {
+      const item = {
+        id: row.id, memberId: row.member_id || 'all', subject: row.subject || '',
+        title: row.title, dueDate: row.due_date || '', done: !!row.done,
+        source: row.source || 'manual', position: Number(row.position) || 0
+      };
+      if (idx >= 0) list[idx] = item;
+      else insertAt(list, row.position, item);
+    }
+    state.homeworks = list;
+    return;
+  }
 }
 
 function handleRealtime(table, payload) {
@@ -2513,6 +3733,7 @@ async function seedRoom() {
   SYNC.ready = true;
   renderAll();
   loadWeather();
+  loadMeals();
 }
 
 async function fullSync() {
@@ -2532,6 +3753,7 @@ async function fullSync() {
     SYNC.online = true;
     renderAll();
     loadWeather();
+    loadMeals();
     setSyncBadge('live');
     if (!SYNC.channel) setupRealtime();
   } catch (err) {
@@ -2567,6 +3789,7 @@ async function initSync() {
       SYNC.ready = true;
       renderAll();
       loadWeather();
+      loadMeals();
     }
     SYNC.online = true;
     setSyncBadge('live');
@@ -2597,10 +3820,15 @@ function renderAll() {
   renderTimer();
   renderChat();
   renderLedger();
+  renderEvents();
+  renderHomeworks();
+  renderGrowth();
+  renderMeals();
 }
 
 renderAll();
 loadWeather();
+loadMeals();
 initSync();
 </script>
 </body>

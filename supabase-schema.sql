@@ -112,6 +112,75 @@ create table if not exists public.family_allowance_tx (
   primary key (room_id, id)
 );
 
+-- ------------------------------------------------------------
+-- v2 확장 (2026-11-17): 학교 급식 · 가족 일정 · 성장 기록 · 학원 숙제
+-- 기존 데이터 보존: add column if not exists / create table if not exists 만 사용
+-- ------------------------------------------------------------
+
+-- 급식: 학교 정보 (기본값 = 대구 경명여자중학교)
+alter table public.family_rooms
+  add column if not exists school_office_code text not null default 'D10',
+  add column if not exists school_code        text not null default '7261037',
+  add column if not exists school_name        text not null default '경명여자중학교';
+
+-- 기존 방에 학교 정보가 비어 있으면 기본 학교로 채웁니다.
+update public.family_rooms
+   set school_office_code = 'D10',
+       school_code        = '7261037',
+       school_name        = '경명여자중학교'
+ where coalesce(school_code, '') = '';
+
+-- 가족 공유 일정 · D-Day
+create table if not exists public.family_events (
+  room_id text not null references public.family_rooms(room_id) on delete cascade,
+  id text not null,
+  title text not null,
+  event_date text not null,
+  event_time text default '',
+  member_id text default 'all',
+  category text default '가족',
+  memo text default '',
+  is_dday boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (room_id, id)
+);
+
+-- 키 · 몸무게 · BMI 성장 기록
+create table if not exists public.family_growth (
+  room_id text not null references public.family_rooms(room_id) on delete cascade,
+  id text not null,
+  member_id text not null,
+  record_date text not null,
+  height_cm double precision,
+  weight_kg double precision,
+  bmi double precision,
+  memo text default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (room_id, id)
+);
+
+-- 학원 · 학교 숙제 (수동 입력 + 초파가 DB로 직접 넣기)
+create table if not exists public.family_homeworks (
+  room_id text not null references public.family_rooms(room_id) on delete cascade,
+  id text not null,
+  member_id text not null default 'all',
+  subject text default '',
+  title text not null,
+  due_date text default '',
+  done boolean not null default false,
+  source text default 'manual',
+  position integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (room_id, id)
+);
+
+create index if not exists family_events_date_idx on public.family_events (room_id, event_date);
+create index if not exists family_growth_member_idx on public.family_growth (room_id, member_id, record_date);
+create index if not exists family_homeworks_order_idx on public.family_homeworks (room_id, done, position);
+
 create index if not exists family_todos_member_idx on public.family_todos (room_id, member_id, position);
 create index if not exists family_chat_seq_idx on public.family_chat_messages (room_id, seq);
 create index if not exists family_tx_seq_idx on public.family_allowance_tx (room_id, seq);
@@ -128,7 +197,8 @@ declare t text;
 begin
   foreach t in array array[
     'family_rooms','family_members','family_todos','family_studies',
-    'family_study_logs','family_stamps','family_missions'
+    'family_study_logs','family_stamps','family_missions',
+    'family_events','family_growth','family_homeworks'
   ] loop
     execute format('drop trigger if exists trg_%1$s_touch on public.%1$s', t);
     execute format('create trigger trg_%1$s_touch before update on public.%1$s for each row execute function public.family_dashboard_touch()', t);
@@ -144,12 +214,15 @@ alter table public.family_stamps        enable row level security;
 alter table public.family_missions      enable row level security;
 alter table public.family_chat_messages enable row level security;
 alter table public.family_allowance_tx  enable row level security;
+alter table public.family_events        enable row level security;
+alter table public.family_growth        enable row level security;
+alter table public.family_homeworks     enable row level security;
 
 do $p$
 declare t text; cond text;
 begin
   cond := $c$length(coalesce(current_setting('request.headers', true)::json->>'x-room-code', '')) = 0 or room_id = current_setting('request.headers', true)::json->>'x-room-code'$c$;
-  foreach t in array array['family_rooms','family_members','family_todos','family_studies','family_study_logs','family_stamps','family_missions','family_chat_messages','family_allowance_tx'] loop
+  foreach t in array array['family_rooms','family_members','family_todos','family_studies','family_study_logs','family_stamps','family_missions','family_chat_messages','family_allowance_tx','family_events','family_growth','family_homeworks'] loop
     execute format('drop policy if exists %I on public.%I', t || '_room_access', t);
     execute format('create policy %I on public.%I for all to anon, authenticated using (%s) with check (%s)', t || '_room_access', t, cond, cond);
   end loop;
@@ -164,7 +237,8 @@ begin
   foreach t in array array[
     'family_rooms','family_members','family_todos','family_studies',
     'family_study_logs','family_stamps','family_missions',
-    'family_chat_messages','family_allowance_tx'
+    'family_chat_messages','family_allowance_tx',
+    'family_events','family_growth','family_homeworks'
   ] loop
     begin
       execute format('alter publication supabase_realtime add table public.%I', t);
