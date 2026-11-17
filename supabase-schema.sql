@@ -287,3 +287,57 @@ grant all on public.tuya_connections to service_role;
 
 alter table public.family_rooms
   add column if not exists light_labels jsonb not null default '{}'::jsonb;
+
+-- ------------------------------------------------------------
+-- v4 확장 (2026-11-17): 📖 AI 독후활동 (소윤이 독서록)
+--   * family_book_reports : 책 1권 = 독서록 1장 (질문·답변 + 최종 카드)
+--   * 위의 "grant ... on all tables" 뒤에 오므로 권한을 따로 준다.
+-- ------------------------------------------------------------
+
+create table if not exists public.family_book_reports (
+  room_id text not null references public.family_rooms(room_id) on delete cascade,
+  id text not null,
+  member_id text not null default 'all',
+  book_title text not null,
+  book_author text default '',
+  book_summary text default '',
+  rating integer,
+  qa_json jsonb not null default '{}'::jsonb,
+  final_report text default '',
+  read_date text default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  primary key (room_id, id)
+);
+
+create index if not exists family_book_reports_room_idx
+  on public.family_book_reports (room_id, created_at desc);
+
+drop trigger if exists trg_family_book_reports_touch on public.family_book_reports;
+create trigger trg_family_book_reports_touch
+  before update on public.family_book_reports
+  for each row execute function public.family_dashboard_touch();
+
+alter table public.family_book_reports enable row level security;
+
+drop policy if exists family_book_reports_room_access on public.family_book_reports;
+create policy family_book_reports_room_access on public.family_book_reports
+  for all to anon, authenticated
+  using (
+    length(coalesce(current_setting('request.headers', true)::json->>'x-room-code', '')) = 0
+    or room_id = current_setting('request.headers', true)::json->>'x-room-code'
+  )
+  with check (
+    length(coalesce(current_setting('request.headers', true)::json->>'x-room-code', '')) = 0
+    or room_id = current_setting('request.headers', true)::json->>'x-room-code'
+  );
+
+grant select, insert, update, delete on public.family_book_reports to anon, authenticated;
+
+do $b$
+begin
+  begin
+    execute 'alter publication supabase_realtime add table public.family_book_reports';
+  exception when duplicate_object then null;
+  end;
+end $b$;
