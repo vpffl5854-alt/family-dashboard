@@ -8,7 +8,9 @@
 //   lookup    { title, author? }                     -> 책 정보(출판사·ISBN·분류·소개)
 //   start     { book, note?, images? }               -> 책 요약 + 1번 질문
 //   answer    { book, brief, qa, question, answer, step, totalSteps, attempt } -> 점검/다음 질문
-//   summarize { book, brief, qa }                    -> 독서록 카드 초안
+//   summarize { book, brief, qa, memberName,
+//               rewrite?, previousReport?, extraQuestion?, instruction? }
+//             -> 독서록 카드 초안 (rewrite/previousReport가 있으면 새로 다듬은 판본)
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -26,7 +28,10 @@ const THIRD_MODEL = 'gemini-3.1-flash-lite';
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 ' +
   '(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
 
-const LIMITS = { title: 120, author: 80, note: 1500, answer: 3000, question: 600, qa: 8, images: 3 };
+const LIMITS = {
+  title: 120, author: 80, note: 1500, answer: 3000, question: 600, qa: 8, images: 3,
+  report: 4000, instruction: 1200,
+};
 const IMAGE_MAX_CHARS = 2_400_000;
 
 // ---------------------------------------------------------------- helpers
@@ -430,7 +435,7 @@ const SCHEMA_SUMMARY: JsonSchema = {
     oneLine: { type: 'string', description: '한 줄 생각(소윤이 말투)' },
     report: { type: 'string', description: '독서록 본문 3~5문단, 1인칭, 소윤이 표현 살리기' },
     favorite: { type: 'string', description: '가장 인상 깊었던 장면' },
-    question: { type: 'string', description: '책에 대해 남은 질문' },
+    question: { type: 'string', description: '책을 다 읽고 나서 한 번 더 떠올려 볼 생각거리 한 줄(선택적 여운, 답을 요구하는 숙제가 아님). 이미 답을 한 질문이면 빈 문자열이나 새로운 여운으로.' },
     tags: { type: 'array', items: { type: 'string' }, description: '독서록 태그 3~5개' },
   },
   required: ['title', 'oneLine', 'report'],
@@ -613,6 +618,12 @@ async function actionSummarize(body: Record<string, unknown>) {
   const brief = (body.brief || {}) as Record<string, unknown>;
   const qa = Array.isArray(body.qa) ? (body.qa as Array<{ question?: string; answer?: string }>).slice(-LIMITS.qa) : [];
   const member = clip(body.memberName, 40) || '소윤';
+  // '다시 정리' — 이전 초안을 보여 주고 같은 문장을 되풀이하지 않게 새로 다듬는다.
+  const rewrite = body.rewrite === true;
+  const previousReport = clip(body.previousReport, LIMITS.report);
+  const extraQuestion = clip(body.extraQuestion, LIMITS.question);
+  const instruction = clip(body.instruction, LIMITS.instruction);
+  const redo = rewrite || !!previousReport;
   if (!qa.length) return json({ error: '문답이 아직 없어요.', code: 'no_qa' }, 400);
 
   const prompt = [
@@ -626,20 +637,33 @@ async function actionSummarize(body: Record<string, unknown>) {
     '',
     '[문답 전체]',
     qaLines(qa),
+    extraQuestion ? `\n[카드에 적어 둔 생각거리]\n${extraQuestion}` : '',
+    instruction ? `\n[${member}이 추가로 적은 생각 / 정리 요청]\n${instruction}` : '',
+    previousReport ? `\n[이전 초안 — ${member}이 직접 고친 부분이 있으면 그 표현도 존중한다]\n${previousReport}` : '',
     '',
     `[할 일] ${member}이의 독서록 카드를 만든다.`,
-    '1) report: 3~5문단 독서록. 1인칭. 문답에서 나온 소윤이의 표현·말투·관점을 최대한 그대로 살린다(문장을 새로 지어 쓰기보다 다듬기).',
+    `1) report: 3~5문단 독서록. 1인칭. 문답에서 나온 ${member}이의 표현·말투·관점을 최대한 그대로 살린다(문장을 새로 지어 쓰기보다 다듬기).`,
     '2) 문답에 없는 사건·감상을 새로 만들어 넣지 않는다. 책 정보로 확인되는 사실만 보충한다.',
-    '3) oneLine: 한 줄 생각(소윤이 말투로 짧게). favorite: 가장 인상 깊었던 장면. question: 책에 대해 남은 질문.',
-    '4) tags: 독서록 태그 3~5개(예: 우정, 성장, 판타지).',
-  ].join('\n');
+    instruction
+      ? `3) [추가로 적은 생각 / 정리 요청]을 반드시 반영한다. 생각·의견이면 report와 oneLine에 ${member}이의 말로 자연스럽게 녹이고, 스타일 요청("더 짧게", "솔직한 말투로" 등)이면 그대로 따른다. 단, 그 내용에 없는 책 속 사실을 지어내지는 않는다.`
+      : '3) 이번에는 추가로 적힌 생각이나 요청이 없다. 문답만으로 쓴다.',
+    extraQuestion && instruction
+      ? `4) [추가로 적은 생각]이 [카드에 적어 둔 생각거리](${extraQuestion})에 대한 답이면, 그 둘을 하나의 문답으로 보고(Q: 그 질문 / A: 적어 준 내용) report에 자연스럽게 합쳐라. 그 질문은 이제 답을 받았으니 question에 같은 질문을 또 쓰지 말고, 빈 문자열로 두거나 완전히 새로운 가벼운 여운 한 줄로 바꿔라.`
+      : '',
+    `5) oneLine: 한 줄 생각(${member} 말투로 짧게). favorite: 가장 인상 깊었던 장면. question: 책을 다 읽고 나서 한 번 더 떠올려 볼 생각거리 한 줄(정답을 요구하는 숙제가 아니라 여운 — 답을 안 적어도 되는 열린 물음, 필요 없으면 빈 문자열).`,
+    '6) tags: 독서록 태그 3~5개(예: 우정, 성장, 판타지).',
+    redo
+      ? `7) 이번에는 처음부터 다시 쓴다. [이전 초안]과 같은 문장·같은 첫 구절·같은 문단 배치를 그대로 되풀이하지 말고 표현과 흐름을 새롭게 다듬어라. 사실과 ${member}이의 생각은 유지하되, 읽는 맛이 눈에 띄게 달라져야 한다.`
+      : '',
+  ].filter(Boolean).join('\n');
 
-  const r = await askJson(SCHEMA_SUMMARY, prompt, [], 0.5);
+  const r = await askJson(SCHEMA_SUMMARY, prompt, [], redo ? 0.85 : 0.5);
   if (!r.ok) return aiFailure(r.trace);
 
   const d = r.data;
   return json({
     ok: true,
+    rewritten: redo,
     model: r.model,
     card: {
       title: clip(d.title, LIMITS.title) || clip(book.title, LIMITS.title),
