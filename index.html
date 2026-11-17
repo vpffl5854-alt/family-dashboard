@@ -1113,6 +1113,9 @@
       flex-direction: column;
     }
 
+    /* 집 조명 카드: 제목줄 + 빠른 스위치를 카드 높이 안에서 세로 가운데 */
+    #lightSummaryCard { justify-content: center; }
+
     /* 집 조명 카드: 4개 방(거실·큰방·주방·소떠기 방♡) 빠른 스위치 2×2 */
     #lightQuickGrid {
       display: grid;
@@ -1121,8 +1124,8 @@
       margin-top: 10px;
     }
     .lq-room {
-      display: flex; flex-direction: column; gap: 5px; min-width: 0;
-      padding: 7px 7px 8px; border-radius: 13px;
+      display: flex; flex-direction: column; gap: 6px; min-width: 0;
+      padding: 9px 8px 10px; border-radius: 13px;
       background: #FFFCF4; border: 1.5px solid #EFE7CF;
     }
     .lq-room.on { background: #FFF8EC; border-color: #F7C98B; }
@@ -1133,7 +1136,7 @@
     .lq-off { margin-left: auto; font-size: 9px; font-weight: 800; color: #A79A86; white-space: nowrap; }
     .lq-btns { display: flex; gap: 4px; }
     .lq-btn {
-      flex: 1 1 0; min-width: 0; padding: 4px 2px; border-radius: 10px;
+      flex: 1 1 0; min-width: 0; padding: 6px 3px; border-radius: 10px;
       border: 1.5px solid #E6DCC4; background: #FFFDF6; color: var(--muted); font-family: inherit;
       display: flex; align-items: baseline; justify-content: center; gap: 3px;
       transition: transform .08s ease, background .15s ease;
@@ -4397,7 +4400,7 @@ function renderLights() {
   if (refreshBtn) refreshBtn.disabled = LIGHTS.loading || unconnected;
   if (allOffBtn) allOffBtn.disabled = LIGHTS.loading || unconnected || onCount === 0;
 
-  if (summaryCard) summaryCard.style.display = unconnected ? 'none' : 'block';
+  if (summaryCard) summaryCard.style.display = unconnected ? 'none' : '';
   if (summaryText) {
     if (!LIGHTS.loaded) summaryText.textContent = '불러오는 중...';
     else if (LIGHTS.error) summaryText.textContent = '상태를 못 불러왔어요 · 눌러서 다시 시도';
