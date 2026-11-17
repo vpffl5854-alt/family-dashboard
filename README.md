@@ -91,12 +91,14 @@
 3. **생각 나누기** — AI 코치가 한 번에 질문 하나. 답을 보내면 서버가 ① 인물·사건 착각, ② 단답/근거 부족을 점검해 `revise`(같은 질문에 다시 답) / `pass`(다음 질문) / `complete`(마지막 통과)로 답한다. 같은 단계에서 두 번째 제출은 막히지 않도록 무조건 통과시킨다.
    - 검색으로 확인한 책 정보와 **명백히** 어긋날 때만 "틀렸다"고 짚고, 확인되지 않은 세부 내용은 논리·근거를 묻는 방식으로 유도한다.
 4. **독서록 카드** — 통과한 문답을 모아 소윤이 말투를 살린 3~5문단 독서록 + 한 줄 생각 + 인상 깊은 장면 + 남은 질문 + 태그를 만든다. 별점(1~5)과 본문은 화면에서 직접 고칠 수 있고, `💾 기록장에 저장`하면 `family_book_reports`에 들어간다.
+   - **💭 남은 질문 · 더 생각해 볼 거리** — 「몰라」로 넘어가 답하지 못한 질문이나, 책을 다 읽고 한 번 더 생각해 볼 여운이 걸리는 자리다. 숙제가 아니라 **그냥 저장해도 되는** 열린 물음이고, 아래 입력칸에 답·생각·정리 요청을 적고 `🔄 다시 정리`를 누르면 독서록 본문에 합쳐진다. 그 질문에 답을 하면 `question`은 비거나 새 가벼운 여운으로 바뀐다.
+   - **🔄 다시 정리** — 누르면 이전 초안과 지금 적은 내용을 함께 서버로 보내(`rewrite`/`previousReport`/`extraQuestion`/`instruction`) temperature 0.85로 **처음부터 새로 다듬은** 판본을 받는다(“같은 문장·첫 구절·문단 배치를 되풀이하지 말 것”). 처리 중에는 버튼이 비활성화되고 끝나면 `🔄 독서록을 새롭게 다듬었어요!` 배너가 뜬다.
 5. **저장된 독서록** — 목록에서 펼쳐 보기 / 수정 / 삭제. `family_book_reports`는 Realtime 게시되어 있어 다른 기기에서 저장해도 목록이 바로 갱신된다.
 
 ### 서버 (Supabase Edge Function `book-mentor`)
 
 - 위치: `supabase/functions/book-mentor/index.ts` — `verify_jwt: true`, `x-room-code` 헤더 필수.
-- actions: `lookup`(도서 검색) / `start`(책 요약 + 1번 질문) / `answer`(점검·다음 질문) / `summarize`(독서록 카드).
+- actions: `lookup`(도서 검색) / `start`(책 요약 + 1번 질문) / `answer`(점검·다음 질문) / `summarize`(독서록 카드, 선택 파라미터 `rewrite`·`previousReport`·`extraQuestion`·`instruction`로 다시 정리).
 - 모델: **`gemini-3.8-flash` 우선 → 실패(429/5xx)하면 `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`** 순서로 자동 폴백. 응답 전체 예산은 50초이고, 3.8이 혼잡(503)이면 5분 동안 3.8을 건너뛰어 첫 응답을 빠르게 한다.
 - 무료 티어 실측(AI Studio > 비율 제한, 2026-11-17): `gemini-3.8-flash` 5 RPM / 20 RPD, `gemini-3.5-flash-lite` 15 RPM / 500 RPD, `gemini-3.1-flash-lite` 15 RPM / 500 RPD. 일일 한도(20 RPD)는 세션 2번이면 차므로 실제로는 폴백 모델이 주로 쓰인다(자동 전환, 사용자는 모름).
 - 키: `GEMINI_API_KEY`는 Supabase **Edge Function Secret**에만 있다. `index.html`·깃·로그에는 없다.

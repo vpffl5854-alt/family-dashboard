@@ -1117,6 +1117,7 @@
   .book-banner { margin-top: 10px; border-radius: 14px; padding: 10px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.6; }
   .book-banner.err { background: #FFF3F3; border: 1.5px solid #F5C2C2; color: #A33; }
   .book-banner.info { background: #F3F8FF; border: 1.5px solid #C6E0FA; color: #2B6CB0; }
+  .book-banner.ok { background: #F1FBF3; border: 1.5px solid #BFE6C8; color: #2F7D4F; }
   .book-loading { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; color: #8A6B3A; padding: 12px 0; }
   .book-dot {
     width: 8px; height: 8px; border-radius: 50%; background: #F4A261;
@@ -4775,6 +4776,7 @@ const BOOKS = {
   feedback: '', feedbackKind: '', lastAnswer: '',
   card: null, rating: 0, editingId: '',
   editOneLine: '', editText: '',
+  rewriteHint: '', reorganizedNotice: '',
   reports: [], viewId: '',
   loading: false, loadingText: '', error: '', model: '',
   channel: null, started: false
@@ -4816,6 +4818,7 @@ function bookCapture() {
   const ans = val('bookAnswerInput'); if (ans !== null) BOOKS.answerText = ans;
   const ol = val('bookOneLineInput'); if (ol !== null) BOOKS.editOneLine = ol;
   const rp = val('bookReportInput'); if (rp !== null) BOOKS.editText = rp;
+  const rh = val('bookRewriteHintInput'); if (rh !== null) BOOKS.rewriteHint = rh;
 }
 
 function bookStarsHtml(rating, big) {
@@ -4914,6 +4917,7 @@ function renderBooksFlow() {
 
   if (BOOKS.stage === 'card') {
     const c = BOOKS.card || {};
+    if (BOOKS.reorganizedNotice) html += '<div class="book-banner ok">' + escapeHtml(BOOKS.reorganizedNotice) + '</div>';
     html += '<div class="book-card-title">' + escapeHtml((BOOKS.book && BOOKS.book.title) || c.title || '') + '</div>' +
       '<div class="book-card-line">' + escapeHtml(((BOOKS.book && BOOKS.book.author) || '') + (BOOKS.book && BOOKS.book.publisher ? ' · ' + BOOKS.book.publisher : '')) + '</div>';
     if (BOOKS.feedback) {
@@ -4925,13 +4929,19 @@ function renderBooksFlow() {
       '<label class="book-label" for="bookReportInput">독서록 (고쳐도 돼요)</label>' +
       '<textarea id="bookReportInput" class="book-input book-textarea" style="min-height:210px">' + escapeHtml(BOOKS.editText) + '</textarea>';
     if (c.favorite) html += '<p class="book-note" style="text-align:left">🎬 인상 깊은 장면: ' + escapeHtml(c.favorite) + '</p>';
-    if (c.question) html += '<p class="book-note" style="text-align:left">❓ 남은 질문: ' + escapeHtml(c.question) + '</p>';
+    /* 💭 더 생각해 볼 거리 — 답을 요구하는 숙제가 아니라 여운. 적어서 '다시 정리'에 반영할 수 있다. */
+    html += '<div class="book-think">' +
+      '<div class="book-label" style="margin-top:12px">💭 남은 질문 · 더 생각해 볼 거리</div>' +
+      (c.question ? '<p class="book-note" style="text-align:left;margin:0 0 7px;color:#6B5B45;font-size:12.5px">“' + escapeHtml(c.question) + '”</p>' : '') +
+      '<p class="book-note" style="text-align:left;margin:0 0 6px">아까 답하지 못하고 넘어간 질문이거나, 책을 다 읽고 한 번 더 생각해 볼 질문이에요. 책을 다시 보고 아래에 답을 보태서 <b>🔄 다시 정리</b>를 누르면 독서록에 합쳐지고, 답을 안 적고 그냥 저장해도 괜찮아요.</p>' +
+      '<textarea id="bookRewriteHintInput" class="book-input book-textarea" style="min-height:74px" placeholder="예: 위 질문에 대한 내 생각, 또는 &quot;조금 더 짧게 / 솔직한 말투로&quot;">' + escapeHtml(BOOKS.rewriteHint) + '</textarea>' +
+      '</div>';
     if (Array.isArray(c.tags) && c.tags.length) {
       html += '<div>' + c.tags.map((t) => '<span class="book-tag">#' + escapeHtml(t) + '</span>').join('') + '</div>';
     }
     html += '<div class="btn-row" style="margin-top:12px">' +
       '<button class="btn btn-green" onclick="bookSave()"' + (BOOKS.loading ? ' disabled' : '') + '>' + (BOOKS.editingId ? '💾 수정 저장' : '💾 기록장에 저장') + '</button>' +
-      '<button class="btn" onclick="bookSummarize(true)">🔄 다시 정리</button>' +
+      '<button class="btn" onclick="bookSummarize(true)"' + (BOOKS.loading ? ' disabled' : '') + '>🔄 다시 정리</button>' +
       '</div>' +
       '<div style="margin-top:8px"><button class="btn btn-sm btn-full" onclick="booksReset()">새 책으로 시작</button></div>' +
       '<p class="book-note">저장하면 가족 모두의 기록장에 남고, 목록에서 다시 열어 고칠 수 있어요.</p>';
@@ -5046,6 +5056,7 @@ function booksReset() {
   BOOKS.feedback = ''; BOOKS.feedbackKind = ''; BOOKS.lastAnswer = '';
   BOOKS.card = null; BOOKS.rating = 0; BOOKS.editingId = '';
   BOOKS.editOneLine = ''; BOOKS.editText = '';
+  BOOKS.rewriteHint = ''; BOOKS.reorganizedNotice = '';
   BOOKS.error = ''; BOOKS.model = ''; BOOKS.loading = false;
   renderBooks();
 }
@@ -5225,17 +5236,29 @@ async function bookSubmitAnswer() {
 async function bookSummarize(manual) {
   if (BOOKS.loading) return;
   if (!BOOKS.qa.length) { BOOKS.error = '아직 문답이 없어요.'; renderBooksFlow(); return; }
+  if (manual) bookCapture();   /* 화면에 적어 둔 독서록 수정·추가 생각을 먼저 상태로 옮긴다 */
   BOOKS.error = '';
-  BOOKS.loading = true; BOOKS.loadingText = '문답을 모아 독서록 카드로 정리하고 있어요...';
+  BOOKS.reorganizedNotice = '';
+  const hint = manual ? String(BOOKS.rewriteHint || '').trim() : '';
+  const payload = {
+    action: 'summarize',
+    book: BOOKS.book,
+    brief: BOOKS.brief,
+    qa: BOOKS.qa.map((x) => ({ question: x.question, answer: x.answer })),
+    memberName: bookMemberName()
+  };
+  if (manual) {
+    /* '다시 정리' — 이전 초안과 지금 적은 생각·요청을 보내 새로 다듬게 한다 */
+    payload.rewrite = true;
+    payload.previousReport = String(BOOKS.editText || '');
+    payload.extraQuestion = String((BOOKS.card && BOOKS.card.question) || '');
+    payload.instruction = hint;
+  }
+  BOOKS.loading = true;
+  BOOKS.loadingText = manual ? '독서록을 새롭게 다듬고 있어요...' : '문답을 모아 독서록 카드로 정리하고 있어요...';
   renderBooksFlow();
   try {
-    const res = await booksApi({
-      action: 'summarize',
-      book: BOOKS.book,
-      brief: BOOKS.brief,
-      qa: BOOKS.qa.map((x) => ({ question: x.question, answer: x.answer })),
-      memberName: bookMemberName()
-    });
+    const res = await booksApi(payload);
     BOOKS.loading = false;
     BOOKS.model = res.model || BOOKS.model;
     BOOKS.card = res.card || null;
@@ -5243,6 +5266,10 @@ async function bookSummarize(manual) {
     BOOKS.editText = (BOOKS.card && BOOKS.card.report) || '';
     if (!BOOKS.rating && BOOKS.card && BOOKS.card.rating) BOOKS.rating = Number(BOOKS.card.rating) || 0;
     BOOKS.stage = 'card';
+    if (manual) {
+      BOOKS.reorganizedNotice = '🔄 독서록을 새롭게 다듬었어요!' + (hint ? ' 적어 준 생각·요청도 반영했어요.' : '');
+      BOOKS.rewriteHint = '';
+    }
     BOOKS.skipCapture = true;   /* 방금 서버에서 받은 값으로 그린다(빈 입력칸이 덮어쓰지 않게) */
   } catch (e) {
     BOOKS.loading = false;
@@ -5353,6 +5380,7 @@ function bookEditReport(id) {
   BOOKS.step = BOOKS.qa.length || 5;
   BOOKS.model = q.model || '';
   BOOKS.error = '';
+  BOOKS.rewriteHint = ''; BOOKS.reorganizedNotice = '';
   BOOKS.skipCapture = true;     /* 저장된 독서록 값으로 그린다 */
   renderBooks();
   const flow = document.getElementById('bookFlowCard');
