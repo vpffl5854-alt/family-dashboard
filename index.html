@@ -1082,6 +1082,20 @@
     .chat-feed { min-height: 260px; max-height: 52vh; }
     .modal { max-width: 520px; }
 
+    /* 넓은 화면에서 버튼이 화면 폭만큼 늘어나거나 반대로 글자가 세로로 쪼개지지 않게 */
+    .app > section[data-section] .btn,
+    .app > section[data-section] .pill-btn { flex: 0 0 auto; white-space: nowrap; }
+    .app > section[data-section] .btn-row > .btn { flex: 0 1 auto; }
+    .app > section[data-section] .btn-full {
+      display: flex;
+      width: 100%;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .app > section[data-section] .stamp-footer .btn { max-width: 340px; }
+    .chat-composer input { flex: 1 1 auto; min-width: 0; }
+
     /* 조명: 넓은 화면에서 한눈에 3~4개씩 */
     .light-grid { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 12px; }
   }
@@ -1091,6 +1105,7 @@
     .app > section[data-section] { gap: 16px 18px; }
     .header h1 { font-size: 25px; }
     .light-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .app > section[data-section] .btn-row > .btn { max-width: 320px; }
   }
 </style>
 </head>
