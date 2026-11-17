@@ -2257,6 +2257,15 @@ function ddayText(dateKey) {
   if (diff > 0) return 'D-' + diff;
   return 'D+' + Math.abs(diff);
 }
+function normalizeDateInput(v) {
+  const s = String(v || '').trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const d = parseDateKey(s);
+    if (!isNaN(d.getTime()) && todayKey(d) === s) return s;
+  }
+  return todayKey();
+}
+
 function dateKo(dateKey) {
   if (!dateKey) return '';
   const d = parseDateKey(dateKey);
@@ -2359,7 +2368,7 @@ function openEventModal(id, presetDate) {
         <input type="checkbox" id="evDday" ${e && e.isDday ? 'checked' : ''} /> 🎯 D-Day로 표시 (홈·일정 탭에 카운트다운)
       </label>
       <div class="btn-row" style="margin-top:4px;">
-        <button class="btn" onclick="closeModal()">취삵</button>
+        <button class="btn" onclick="closeModal()">취소</button>
         <button class="btn btn-green" onclick="saveEvent(${id ? `'${id}'` : 'null'})">${e ? '수정 저장' : '추가하기'}</button>
       </div>
     </div>
@@ -2369,7 +2378,7 @@ function openEventModal(id, presetDate) {
 function saveEvent(id) {
   const title = document.getElementById('evTitle').value.trim();
   if (!title) { showCoinToast('⚠️ 일정 이름을 적어주세요'); return; }
-  const dateVal = document.getElementById('evDate').value || todayKey();
+  const dateVal = normalizeDateInput(document.getElementById('evDate').value);
   const payload = {
     title,
     date: dateVal,
@@ -2872,7 +2881,7 @@ function updateBmiPreview() {
 
 function saveGrowth() {
   const memberId = document.getElementById('grMember').value;
-  const date = document.getElementById('grDate').value || todayKey();
+  const date = normalizeDateInput(document.getElementById('grDate').value);
   const h = Number(document.getElementById('grHeight').value) || null;
   const w = Number(document.getElementById('grWeight').value) || null;
   if (!h && !w) { showCoinToast('⚠️ 키나 몸무게 중 하나는 적어주세요'); return; }
@@ -2991,7 +3000,7 @@ function saveHomework() {
     memberId: document.getElementById('hwMember').value || 'all',
     subject: (document.getElementById('hwSubject').value || '').trim(),
     title,
-    dueDate: document.getElementById('hwDue').value || '',
+    dueDate: (document.getElementById('hwDue').value ? normalizeDateInput(document.getElementById('hwDue').value) : ''),
     done: false,
     source: 'manual',
     position: state.homeworks.length
