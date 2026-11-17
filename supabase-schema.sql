@@ -250,3 +250,40 @@ end $r$;
 select tablename from pg_publication_tables
 where pubname = 'supabase_realtime' and tablename like 'family_%'
 order by tablename;
+
+-- ------------------------------------------------------------
+-- v3 확장 (2026-11-17): Smart Life(Tuya) 집 조명 연동
+--   * tuya_connections : 방별 Smart Life 토큰 (service_role 전용)
+--   * family_rooms.light_labels : 스위치 채널 이름 별칭 (가족 공유)
+--   * 위의 "grant select, insert, update, delete ... to anon, authenticated"
+--     뒤에 revoke 가 와야 하므로 반드시 이 파일 맨 끝에 둔다.
+-- ------------------------------------------------------------
+
+create table if not exists public.tuya_connections (
+  room_id text primary key references public.family_rooms(room_id) on delete cascade,
+  home_id text not null,
+  client_id text not null,
+  user_code text not null,
+  terminal_id text not null,
+  endpoint text not null,
+  uid text not null,
+  access_token text not null,
+  refresh_token text not null,
+  expire_at_ms bigint not null,
+  switch_labels jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.tuya_connections enable row level security;
+
+do $d$
+begin
+  execute 'drop policy if exists tuya_connections_room_access on public.tuya_connections';
+end $d$;
+
+revoke all on public.tuya_connections from anon, authenticated;
+revoke all on public.tuya_connections from public;
+grant all on public.tuya_connections to service_role;
+
+alter table public.family_rooms
+  add column if not exists light_labels jsonb not null default '{}'::jsonb;
