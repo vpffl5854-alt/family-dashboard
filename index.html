@@ -1019,6 +1019,79 @@
   .light-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .light-row .light-row-name { flex: 1 1 auto; font-size: 12.5px; font-weight: 800; }
   .light-row input { flex: 1 1 120px; min-width: 0; padding: 7px 9px; border-radius: 11px; border: 1.5px solid var(--border); font-family: inherit; font-size: 12.5px; background: #FFFDF8; }
+
+  /* ==================================================================
+     반응형 레이아웃 (2026-11-17)
+     - ~819px (폰 세로): 위의 460px 1열 그대로. 아래 규칙은 전부 820px 이상에서만 적용된다.
+     - 820~1119px (태블릿 가로): 앱 폭 1000px, 카드 2열
+     - 1120px~ (넓은 태블릿·PC): 앱 폭 1280px, 카드 3열
+     섹션마다 auto-fit 그리드라서 카드가 1장뿐인 섹션은 자동으로 한 줄 전체를 쓴다.
+     ================================================================== */
+  @media (min-width: 820px) {
+    body { padding-bottom: 40px; }
+    .app {
+      max-width: 1000px;
+      padding: 18px 20px 40px;
+    }
+
+    /* 헤더: 오른쪽 액션을 한 줄로 가로 정렬 */
+    .header { align-items: center; }
+    .header h1 { font-size: 23px; }
+    .title-wrap { gap: 10px; }
+    .header-actions {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* 탭: 한 줄에 여유 있게 펴고, 넘치면 두 줄로 감싼다 */
+    .nav-tabs {
+      flex-wrap: wrap;
+      justify-content: center;
+      overflow-x: visible;
+      padding: 7px;
+      margin-bottom: 18px;
+    }
+    .nav-tab { font-size: 12.5px; padding: 8px 13px; }
+
+    /* 섹션을 카드 그리드로 — 카드 1장이면 전체 폭, 2~3장이면 나란히 */
+    .app > section[data-section] {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 14px 16px;
+      align-items: start;
+      align-content: start;
+    }
+    .app > section[data-section] + section[data-section] { margin-top: 16px; }
+    .app > section[data-section] > .card,
+    .app > section[data-section] > #todoCardsWrap > .card { margin-bottom: 0; }
+    /* 가족 할 일 카드들을 섹션 그리드에 바로 참여시킨다 */
+    #todoCardsWrap { display: contents; }
+
+    /* 긴 글·스크롤이 있는 한 장짜리 섹션은 적정 폭으로 가운데 정렬 */
+    .app > section[data-section="chat"] > .card,
+    .app > section[data-section="ledger"] > .card,
+    .app > section[data-section="growth"] > .card {
+      width: 100%;
+      max-width: 920px;
+      margin: 0 auto;
+      justify-self: center;
+    }
+    .chat-feed { min-height: 260px; max-height: 52vh; }
+    .modal { max-width: 520px; }
+
+    /* 조명: 넓은 화면에서 한눈에 3~4개씩 */
+    .light-grid { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 12px; }
+  }
+
+  @media (min-width: 1120px) {
+    .app { max-width: 1280px; padding: 20px 24px 44px; }
+    .app > section[data-section] { gap: 16px 18px; }
+    .header h1 { font-size: 25px; }
+    .light-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  }
 </style>
 </head>
 <body>
