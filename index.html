@@ -1026,6 +1026,111 @@
   /* 할 일 카드 목록 — 폰에서는 예전처럼 전부 펼쳐서 보여준다 */
   .todo-scroll-list { max-height: none; overflow-y: visible; }
 
+  /* ===== v5: 📖 AI 독후활동 ===== */
+  .book-label { display: block; font-size: 12px; font-weight: 800; color: var(--muted); margin: 10px 0 4px; }
+  .book-input {
+    width: 100%; padding: 11px 12px; border-radius: 14px; border: 1.5px solid var(--border);
+    background: #FFFDF8; font-family: inherit; font-size: 14px; color: var(--text);
+  }
+  .book-input::placeholder { color: #B6A98F; }
+  .book-input:focus { outline: none; border-color: #E2B26A; box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.15); }
+  .book-textarea { min-height: 112px; resize: vertical; line-height: 1.6; }
+  .book-more { margin: 14px 0 2px; border-top: 1px dashed #E9DFC6; padding-top: 10px; }
+  .book-more > summary { cursor: pointer; font-size: 12.5px; font-weight: 800; color: #8A6B3A; list-style: none; }
+  .book-more > summary::-webkit-details-marker { display: none; }
+  .book-more > summary::before { content: '📷 '; }
+  .book-more[open] > summary { margin-bottom: 4px; }
+  .book-photo-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .book-thumb-wrap {
+    position: relative; width: 72px; height: 72px; border-radius: 12px; overflow: hidden;
+    border: 1.5px solid var(--border); background: #F8F3E6;
+  }
+  .book-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .book-thumb-del {
+    position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: rgba(58, 50, 40, 0.66); color: #fff; font-size: 12px; line-height: 20px; padding: 0;
+  }
+  .book-file-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 12px;
+    border: 1.5px dashed #D8C9A8; background: #FFFDF6; font-family: inherit;
+    font-size: 12.5px; font-weight: 800; color: #8A7E6B; width: 100%; justify-content: center;
+  }
+  .book-found { display: flex; gap: 12px; align-items: flex-start; margin: 4px 0 8px; }
+  .book-cover {
+    width: 74px; height: 104px; object-fit: cover; border-radius: 10px;
+    border: 1px solid #E7DFC9; background: #F5EFE0; flex: 0 0 auto;
+  }
+  .book-cover.empty { display: grid; place-items: center; font-size: 26px; }
+  .book-title-lg { font-size: 16px; font-weight: 900; line-height: 1.35; word-break: keep-all; }
+  .book-sub { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .book-meta { font-size: 11px; font-weight: 700; color: #A0917A; margin-top: 5px; line-height: 1.5; }
+  .book-blurb {
+    margin: 8px 0 0; font-size: 12.5px; line-height: 1.65; color: #5B5245;
+    background: #FFFCF2; border: 1px solid #EFE7CF; border-radius: 14px; padding: 10px 12px;
+    max-height: 170px; overflow: auto;
+  }
+  .book-alt { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .book-alt-btn {
+    border: 1.5px solid var(--border); background: #FFF; border-radius: 999px; padding: 6px 10px;
+    font-family: inherit; font-size: 11.5px; font-weight: 800; color: var(--muted);
+  }
+  .book-step-chip {
+    font-size: 12px; font-weight: 900; color: #2B6CB0; background: #EBF5FF;
+    border: 1px solid #C6E0FA; border-radius: 10px; padding: 3px 9px; white-space: nowrap;
+  }
+  .book-q {
+    font-size: 15px; font-weight: 800; line-height: 1.6; background: #FFF7E8;
+    border: 1.5px solid #F6DFB0; border-radius: 16px; padding: 13px 14px;
+  }
+  .book-q::before { content: 'Q. '; color: #B45309; }
+  .book-feedback { margin-top: 10px; border-radius: 15px; padding: 11px 13px; font-size: 12.5px; line-height: 1.65; font-weight: 700; }
+  .book-feedback.revise { background: #FFF4E5; border: 1.5px solid #F6C98B; color: #8A4B08; }
+  .book-feedback.pass { background: #EAF7EF; border: 1.5px solid #B8E6C8; color: #22603B; }
+  .book-feedback .bf-title { font-size: 11.5px; font-weight: 900; letter-spacing: 0.2px; display: block; margin-bottom: 3px; }
+  .book-answer-echo { margin-top: 7px; font-size: 11.5px; font-weight: 700; color: #8A7E6B; line-height: 1.5; }
+  .book-history { margin-top: 12px; }
+  .book-history > summary { cursor: pointer; font-size: 12px; font-weight: 800; color: var(--muted); }
+  .book-history-item { margin-top: 8px; border-left: 3px solid #EFE5C5; padding: 2px 0 2px 10px; font-size: 12px; line-height: 1.55; }
+  .book-history-q { font-weight: 800; color: #5B5245; }
+  .book-history-a { color: var(--muted); margin-top: 2px; }
+  .book-stars { display: flex; gap: 4px; margin: 6px 0 2px; }
+  .book-star { border: none; background: none; font-size: 25px; line-height: 1; padding: 0 1px; color: #E4D8BE; cursor: pointer; }
+  .book-star.on { color: #F6A623; }
+  .book-card-title { font-size: 16px; font-weight: 900; line-height: 1.4; }
+  .book-card-line { font-size: 12.5px; font-weight: 700; color: var(--muted); margin-top: 3px; }
+  .book-report-text {
+    font-size: 13px; line-height: 1.78; white-space: pre-wrap; background: #FFFCF2;
+    border: 1px solid #EFE7CF; border-radius: 15px; padding: 12px 13px; margin-top: 8px;
+  }
+  .book-tag {
+    display: inline-block; font-size: 11px; font-weight: 800; color: #8A6B3A; background: #FFF3D6;
+    border: 1px solid #F6D88C; border-radius: 8px; padding: 2px 8px; margin: 6px 4px 0 0;
+  }
+  .book-list-item { border: 1.5px solid #EFE7CF; border-radius: 18px; padding: 11px 12px; background: #FFFDF8; margin-top: 9px; }
+  .book-list-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .book-list-title { font-size: 14px; font-weight: 900; line-height: 1.4; word-break: keep-all; }
+  .book-list-meta { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+  .book-list-stars { font-size: 13px; color: #F6A623; letter-spacing: 1px; white-space: nowrap; }
+  .book-list-btns { display: flex; gap: 6px; margin-top: 9px; }
+  .book-list-btns .btn { flex: 1; }
+  .book-note { font-size: 11.5px; line-height: 1.6; color: #A0917A; margin-top: 10px; }
+  .book-banner { margin-top: 10px; border-radius: 14px; padding: 10px 12px; font-size: 12.5px; font-weight: 700; line-height: 1.6; }
+  .book-banner.err { background: #FFF3F3; border: 1.5px solid #F5C2C2; color: #A33; }
+  .book-banner.info { background: #F3F8FF; border: 1.5px solid #C6E0FA; color: #2B6CB0; }
+  .book-loading { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 800; color: #8A6B3A; padding: 12px 0; }
+  .book-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #F4A261;
+    animation: bookPulse 1s infinite ease-in-out;
+  }
+  @keyframes bookPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.12); }
+  }
+  .book-src {
+    font-size: 10.5px; font-weight: 800; color: #276749; background: #E6F7ED;
+    border: 1px solid #B8E6C8; border-radius: 8px; padding: 1px 6px;
+  }
+
   /* ==================================================================
      반응형 레이아웃 (2026-11-17)
      - ~819px (폰 세로): 위의 460px 1열 그대로. 아래 규칙은 전부 820px 이상에서만 적용된다.
@@ -1213,6 +1318,7 @@
     <button class="nav-tab" data-tab="home" onclick="switchTab('home')">🏠 홈</button>
     <button class="nav-tab" data-tab="lights" onclick="switchTab('lights')">💡 조명</button>
     <button class="nav-tab" data-tab="study" onclick="switchTab('study')">📚 공부·숙제</button>
+    <button class="nav-tab" data-tab="books" onclick="switchTab('books')">📖 독후활동</button>
     <button class="nav-tab" data-tab="schedule" onclick="switchTab('schedule')">📅 일정·D-Day</button>
     <button class="nav-tab" data-tab="meal" onclick="switchTab('meal')">🍱 급식</button>
     <button class="nav-tab" data-tab="growth" onclick="switchTab('growth')">🌱 성장</button>
@@ -1371,6 +1477,25 @@
       <p class="card-desc">과목과 마감일을 적어두면 가족 모두가 같은 화면에서 확인하고 체크해요.</p>
       <button class="btn btn-full btn-amber" onclick="openHomeworkModal()" style="margin-bottom:10px;">+ 숙제 추가</button>
       <div class="item-list" id="homeworkList"></div>
+    </div>
+  </section>
+
+  <!-- BOOKS SECTION (AI 독후활동) -->
+  <section data-section="books">
+    <div class="card card-soft-blue" id="bookFlowCard">
+      <div class="card-head">
+        <h2 class="card-title">📖 AI 독후활동</h2>
+        <span class="badge badge-blue" id="bookStageBadge">책 찾기</span>
+      </div>
+      <p class="card-desc">책을 찾고 생각을 말하면, AI 코치가 질문 5~6개로 생각을 끌어내고 독서록 카드로 정리해요. 답은 소윤이가 직접 써요.</p>
+      <div id="bookFlow"></div>
+    </div>
+    <div class="card" id="bookListCard">
+      <div class="card-head">
+        <h2 class="card-title">📚 저장된 독서록</h2>
+        <span class="badge badge-gray" id="bookListCount">0권</span>
+      </div>
+      <div id="bookReportList"></div>
     </div>
   </section>
 
@@ -1660,6 +1785,7 @@ function switchTab(tab) {
     sec.classList.toggle('hidden', tab !== 'all' && sec.dataset.section !== tab);
   });
   if (tab === 'lights') ensureLights(false);
+  if (tab === 'books' && SYNC.client) { booksLoad(); booksSubscribe(); }
   updateTodoScrollHints();
 }
 
@@ -4631,6 +4757,664 @@ document.addEventListener('visibilitychange', () => {
   if (Date.now() - LIGHTS.lastFetch > 20000 && (currentTab === 'all' || currentTab === 'lights')) ensureLights(false);
 });
 
+/* ==================================================================
+   📖 AI 독후활동 (독서록)
+   - 책 찾기·질문·답 점검·독서록 정리는 Supabase Edge Function 'book-mentor'
+   - 저장은 family_book_reports 테이블(x-room-code RLS)만 따로 읽고 쓴다
+     (기존 SYNC 상태 파이프라인은 건드리지 않는다)
+   ================================================================== */
+const BOOKS_API = SUPABASE_URL + '/functions/v1/book-mentor';
+const BOOK_CACHE_KEY = 'family_dashboard_book_reports_cache';
+const BOOKS = {
+  stage: 'search',                 // search | confirm | qa | card | done
+  title: '', author: '', note: '', answerText: '',
+  images: [],
+  book: null, candidates: [], source: '', foundMsg: '',
+  brief: null, totalSteps: 5, step: 1, question: '', greeting: '',
+  qa: [], attempt: 1,
+  feedback: '', feedbackKind: '', lastAnswer: '',
+  card: null, rating: 0, editingId: '',
+  editOneLine: '', editText: '',
+  reports: [], viewId: '',
+  loading: false, loadingText: '', error: '', model: '',
+  channel: null, started: false
+};
+
+const BOOK_STAGE_LABEL = { search: '책 찾기', confirm: '책 확인', qa: '생각 나누기', card: '독서록 카드', done: '저장 완료' };
+const BOOK_SRC_LABEL = { aladin: '알라딘 확인', kyobobook: '교보문고 확인' };
+
+function booksApiError(e) {
+  return String((e && e.message) || e || '알 수 없는 오류');
+}
+
+async function booksApi(payload) {
+  const res = await fetch(BOOKS_API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+      'x-room-code': ROOM_ID
+    },
+    body: JSON.stringify(payload)
+  });
+  let data = null;
+  try { data = await res.json(); } catch (e) { data = null; }
+  if (!res.ok) throw new Error((data && data.error) || ('HTTP ' + res.status));
+  return data || {};
+}
+
+/* 렌더 전에 화면에 입력 중인 값을 상태로 옮겨 둔다(다시 그려도 글이 날아가지 않게) */
+function bookCapture() {
+  const val = (id) => {
+    const el = document.getElementById(id);
+    return el ? el.value : null;
+  };
+  const t = val('bookTitleInput'); if (t !== null) BOOKS.title = t;
+  const a = val('bookAuthorInput'); if (a !== null) BOOKS.author = a;
+  const n = val('bookNoteInput'); if (n !== null) BOOKS.note = n;
+  const ans = val('bookAnswerInput'); if (ans !== null) BOOKS.answerText = ans;
+  const ol = val('bookOneLineInput'); if (ol !== null) BOOKS.editOneLine = ol;
+  const rp = val('bookReportInput'); if (rp !== null) BOOKS.editText = rp;
+}
+
+function bookStarsHtml(rating, big) {
+  const n = Math.max(0, Math.min(5, Number(rating) || 0));
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    if (big) html += '<button type="button" class="book-star' + (i <= n ? ' on' : '') + '" data-n="' + i + '" onclick="bookSetRating(' + i + ')" aria-label="별점 ' + i + '">★</button>';
+    else html += '<span class="book-star' + (i <= n ? ' on' : '') + '" style="cursor:default;font-size:13px;padding:0">★</span>';
+  }
+  return html;
+}
+
+function bookStarText(rating) {
+  const n = Math.max(0, Math.min(5, Number(rating) || 0));
+  return n ? '★'.repeat(n) + '☆'.repeat(5 - n) : '';
+}
+
+/* ---------------------------------------------------------------- 흐름(카드 본문) */
+function renderBooksFlow() {
+  bookCapture();
+  const flow = document.getElementById('bookFlow');
+  const badge = document.getElementById('bookStageBadge');
+  if (!flow) return;
+  if (badge) badge.textContent = BOOK_STAGE_LABEL[BOOKS.stage] || '독후활동';
+
+  let html = '';
+
+  if (BOOKS.loading) {
+    html += '<div class="book-loading"><span class="book-dot"></span>' + escapeHtml(BOOKS.loadingText || '잠시만 기다려 주세요...') + '</div>';
+  }
+  if (BOOKS.error) {
+    html += '<div class="book-banner err">' + escapeHtml(BOOKS.error) + '</div>';
+  }
+  if (BOOKS.foundMsg && BOOKS.stage === 'search') {
+    html += '<div class="book-banner info">' + escapeHtml(BOOKS.foundMsg) + '</div>';
+  }
+
+  if (BOOKS.stage === 'search') {
+    html += '<label class="book-label" for="bookTitleInput">책 제목</label>' +
+      '<input id="bookTitleInput" class="book-input" placeholder="예: 3월의 마치" value="' + escapeHtml(BOOKS.title) + '" ' +
+      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();bookLookup();}">' +
+      '<label class="book-label" for="bookAuthorInput">지은이 (선택)</label>' +
+      '<input id="bookAuthorInput" class="book-input" placeholder="예: 정한아" value="' + escapeHtml(BOOKS.author) + '" ' +
+      'onkeydown="if(event.key===\'Enter\'){event.preventDefault();bookLookup();}">' +
+      '<div style="margin-top:12px"><button class="btn btn-blue btn-full" onclick="bookLookup()"' + (BOOKS.loading ? ' disabled' : '') + '>🔎 책 찾기</button></div>' +
+      bookExtraHtml() +
+      '<p class="book-note">제목만 넣어도 출판사·ISBN·책 소개를 서버에서 실제로 검색해 와요. 도서관 책처럼 검색이 안 되는 책은 아래에 사진이나 메모를 남겨 주세요.</p>';
+  }
+
+  if (BOOKS.stage === 'confirm') {
+    const b = BOOKS.book || {};
+    const src = BOOK_SRC_LABEL[BOOKS.source] || '검색 확인';
+    html += '<div class="book-found">' +
+      (b.cover
+        ? '<img class="book-cover" src="' + escapeHtml(b.cover) + '" alt="책 표지" onerror="this.classList.add(\'empty\');this.replaceWith(Object.assign(document.createElement(\'div\'),{className:\'book-cover empty\',textContent:\'📕\'}))">'
+        : '<div class="book-cover empty">📕</div>') +
+      '<div style="flex:1;min-width:0">' +
+      '<div class="book-title-lg">' + escapeHtml(b.title || '') + '</div>' +
+      '<div class="book-sub">' + escapeHtml([b.author, b.publisher, b.year].filter(Boolean).join(' · ') || '지은이·출판사 정보 없음') + '</div>' +
+      '<div class="book-meta">' + escapeHtml([b.category, b.pages, b.isbn ? 'ISBN ' + b.isbn : ''].filter(Boolean).join(' · ')) + '</div>' +
+      '<div style="margin-top:6px"><span class="book-src">' + escapeHtml(src) + '</span></div>' +
+      '</div></div>' +
+      (b.blurb ? '<div class="book-blurb">' + escapeHtml(b.blurb) + '</div>' : '') +
+      bookOtherCandidatesHtml() +
+      bookExtraHtml() +
+      '<div class="btn-row" style="margin-top:12px">' +
+      '<button class="btn btn-green" onclick="bookStart()"' + (BOOKS.loading ? ' disabled' : '') + '>이 책으로 시작</button>' +
+      '<button class="btn" onclick="booksReset()">다른 책</button>' +
+      '</div>';
+  }
+
+  if (BOOKS.stage === 'qa') {
+    const pct = Math.round((Math.min(BOOKS.step, BOOKS.totalSteps) / BOOKS.totalSteps) * 100);
+    html += '<div class="progress-wrap" style="margin-bottom:10px">' +
+      '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="progress-label">질문 ' + BOOKS.step + ' / ' + BOOKS.totalSteps + '</div></div>';
+    if (BOOKS.greeting && BOOKS.step === 1 && !BOOKS.feedback) {
+      html += '<div class="book-card-line" style="margin-bottom:8px">' + escapeHtml(BOOKS.greeting) + '</div>';
+    }
+    if (BOOKS.feedback) {
+      const kind = BOOKS.feedbackKind === 'revise' ? 'revise' : 'pass';
+      html += '<div class="book-feedback ' + kind + '">' +
+        '<span class="bf-title">' + (kind === 'revise' ? '✏️ 한 번만 더 다듬어 볼까?' : '✅ 좋아, 통과!') + '</span>' +
+        escapeHtml(BOOKS.feedback) +
+        (BOOKS.lastAnswer ? '<div class="book-answer-echo">네가 쓴 답: ' + escapeHtml(BOOKS.lastAnswer) + '</div>' : '') +
+        '</div>';
+    }
+    html += '<div class="book-q" style="margin-top:10px">' + escapeHtml(BOOKS.question) + '</div>' +
+      '<label class="book-label" for="bookAnswerInput">내 생각 쓰기</label>' +
+      '<textarea id="bookAnswerInput" class="book-input book-textarea" placeholder="정답은 없어요. 내 말로 편하게 써 봐요.">' + escapeHtml(BOOKS.answerText) + '</textarea>' +
+      '<div style="margin-top:10px"><button class="btn btn-blue btn-full" onclick="bookSubmitAnswer()"' + (BOOKS.loading ? ' disabled' : '') + '>' +
+      (BOOKS.feedbackKind === 'revise' ? '✍️ 다시 답하기' : '✍️ 답 보내기') + '</button></div>' +
+      bookHistoryHtml();
+  }
+
+  if (BOOKS.stage === 'card') {
+    const c = BOOKS.card || {};
+    html += '<div class="book-card-title">' + escapeHtml((BOOKS.book && BOOKS.book.title) || c.title || '') + '</div>' +
+      '<div class="book-card-line">' + escapeHtml(((BOOKS.book && BOOKS.book.author) || '') + (BOOKS.book && BOOKS.book.publisher ? ' · ' + BOOKS.book.publisher : '')) + '</div>';
+    if (BOOKS.feedback) {
+      html += '<div class="book-feedback pass" style="margin-top:10px"><span class="bf-title">마지막 피드백</span>' + escapeHtml(BOOKS.feedback) + '</div>';
+    }
+    html += '<label class="book-label">별점</label><div class="book-stars" id="bookStars">' + bookStarsHtml(BOOKS.rating, true) + '</div>' +
+      '<label class="book-label" for="bookOneLineInput">한 줄 생각</label>' +
+      '<input id="bookOneLineInput" class="book-input" value="' + escapeHtml(BOOKS.editOneLine) + '" placeholder="이 책을 한 줄로 말하면?">' +
+      '<label class="book-label" for="bookReportInput">독서록 (고쳐도 돼요)</label>' +
+      '<textarea id="bookReportInput" class="book-input book-textarea" style="min-height:210px">' + escapeHtml(BOOKS.editText) + '</textarea>';
+    if (c.favorite) html += '<p class="book-note" style="text-align:left">🎬 인상 깊은 장면: ' + escapeHtml(c.favorite) + '</p>';
+    if (c.question) html += '<p class="book-note" style="text-align:left">❓ 남은 질문: ' + escapeHtml(c.question) + '</p>';
+    if (Array.isArray(c.tags) && c.tags.length) {
+      html += '<div>' + c.tags.map((t) => '<span class="book-tag">#' + escapeHtml(t) + '</span>').join('') + '</div>';
+    }
+    html += '<div class="btn-row" style="margin-top:12px">' +
+      '<button class="btn btn-green" onclick="bookSave()"' + (BOOKS.loading ? ' disabled' : '') + '>' + (BOOKS.editingId ? '💾 수정 저장' : '💾 기록장에 저장') + '</button>' +
+      '<button class="btn" onclick="bookSummarize(true)">🔄 다시 정리</button>' +
+      '</div>' +
+      '<div style="margin-top:8px"><button class="btn btn-sm btn-full" onclick="booksReset()">새 책으로 시작</button></div>' +
+      '<p class="book-note">저장하면 가족 모두의 기록장에 남고, 목록에서 다시 열어 고칠 수 있어요.</p>';
+  }
+
+  if (BOOKS.stage === 'done') {
+    const c = BOOKS.card || {};
+    html += '<div class="book-banner info">🎉 독서록 카드를 기록장에 저장했어요. 아래 목록에서 언제든 다시 볼 수 있어요.</div>' +
+      '<div class="book-card-title" style="margin-top:12px">' + escapeHtml((BOOKS.book && BOOKS.book.title) || c.title || '') + '</div>' +
+      '<div class="book-card-line">' + bookStarText(BOOKS.rating) + '</div>' +
+      (BOOKS.editOneLine ? '<div class="book-card-line" style="font-weight:800;color:var(--text);margin-top:6px">“' + escapeHtml(BOOKS.editOneLine) + '”</div>' : '') +
+      '<div class="book-report-text">' + escapeHtml(BOOKS.editText) + '</div>' +
+      '<div class="btn-row" style="margin-top:12px">' +
+      '<button class="btn btn-blue" onclick="booksReset()">📖 새 책 시작</button>' +
+      '<button class="btn" onclick="document.getElementById(\'bookReportList\').scrollIntoView({behavior:\'smooth\',block:\'center\'})">목록 보기</button>' +
+      '</div>';
+  }
+
+  flow.innerHTML = html;
+}
+
+function bookExtraHtml() {
+  let html = '<details class="book-more"' + (BOOKS.images.length || BOOKS.note ? ' open' : '') + '>' +
+    '<summary>도서관 책이거나 검색이 안 될 때 — 사진 · 메모 남기기 (선택)</summary>' +
+    '<div class="book-photo-row">';
+  BOOKS.images.forEach((src, i) => {
+    html += '<div class="book-thumb-wrap"><img src="' + src + '" alt="책 사진 ' + (i + 1) + '">' +
+      '<button class="book-thumb-del" type="button" onclick="bookRemovePhoto(' + i + ')" aria-label="사진 삭제">✕</button></div>';
+  });
+  if (BOOKS.images.length < 3) {
+    html += '<label class="book-file-btn" style="width:auto">📷 사진 추가' +
+      '<input type="file" accept="image/*" multiple style="display:none" onchange="bookPickPhotos(this)"></label>';
+  }
+  html += '</div>';
+  html += '<label class="book-label" for="bookNoteInput">책 내용 2~3줄 메모</label>' +
+    '<textarea id="bookNoteInput" class="book-input book-textarea" style="min-height:74px" placeholder="예: 주인공 민서가 할머니 집으로 이사 가면서 벌어지는 이야기. 마지막에 할머니가 편지를 남긴다.">' + escapeHtml(BOOKS.note) + '</textarea>' +
+    '</details>';
+  return html;
+}
+
+function bookOtherCandidatesHtml() {
+  const list = (BOOKS.candidates || []).filter((c) => c.title && (!BOOKS.book || c.title !== BOOKS.book.title));
+  if (list.length < 1) return '';
+  return '<div class="book-alt">' + list.slice(0, 4).map((c, i) =>
+    '<button class="book-alt-btn" onclick="bookPickCandidate(' + i + ')">' + escapeHtml(c.title) + '</button>').join('') + '</div>';
+}
+
+function bookHistoryHtml() {
+  if (!BOOKS.qa.length) return '';
+  return '<details class="book-history"><summary>지금까지 문답 ' + BOOKS.qa.length + '개 보기</summary>' +
+    BOOKS.qa.map((x, i) => '<div class="book-history-item"><div class="book-history-q">Q' + (i + 1) + '. ' + escapeHtml(x.question) + '</div>' +
+      '<div class="book-history-a">' + escapeHtml(x.answer) + '</div></div>').join('') +
+    '</details>';
+}
+
+/* ---------------------------------------------------------------- 목록 */
+function renderBookList() {
+  const box = document.getElementById('bookReportList');
+  const cnt = document.getElementById('bookListCount');
+  if (!box) return;
+  if (cnt) cnt.textContent = BOOKS.reports.length + '권';
+  if (!BOOKS.reports.length) {
+    box.innerHTML = '<div class="empty-hint">아직 저장된 독서록이 없어요.<br>위에서 책을 찾아 첫 독서록을 만들어 보세요.</div>';
+    return;
+  }
+  box.innerHTML = BOOKS.reports.map((row) => {
+    const q = row.qa_json || {};
+    const card = q.card || {};
+    const open = BOOKS.viewId === row.id;
+    const who = (state.members || []).find((m) => m.id === row.member_id);
+    const meta = [row.book_author, row.read_date, who ? who.name : ''].filter(Boolean).join(' · ');
+    let html = '<div class="book-list-item">' +
+      '<div class="book-list-head"><div style="flex:1;min-width:0">' +
+      '<div class="book-list-title">' + escapeHtml(row.book_title || '') + '</div>' +
+      '<div class="book-list-meta">' + escapeHtml(meta) + '</div>' +
+      (card.oneLine ? '<div class="book-list-meta" style="color:#5B5245;font-weight:800;margin-top:5px">“' + escapeHtml(card.oneLine) + '”</div>' : '') +
+      '</div>' +
+      (row.rating ? '<div class="book-list-stars">' + bookStarText(row.rating) + '</div>' : '') +
+      '</div>';
+    if (open) {
+      html += '<div class="book-report-text">' + escapeHtml(row.final_report || card.report || '') + '</div>';
+      if (card.favorite) html += '<p class="book-note" style="text-align:left">🎬 ' + escapeHtml(card.favorite) + '</p>';
+      if (card.question) html += '<p class="book-note" style="text-align:left">❓ ' + escapeHtml(card.question) + '</p>';
+      if (Array.isArray(card.tags) && card.tags.length) {
+        html += '<div>' + card.tags.map((t) => '<span class="book-tag">#' + escapeHtml(t) + '</span>').join('') + '</div>';
+      }
+      const qaCount = Array.isArray(q.qa) ? q.qa.length : 0;
+      html += '<p class="book-note" style="text-align:left">질문 ' + qaCount + '개로 만든 독서록' + (q.model ? ' · AI ' + escapeHtml(String(q.model)) : '') + '</p>';
+    }
+    html += '<div class="book-list-btns">' +
+      '<button class="btn btn-sm" onclick="bookToggleReport(\'' + row.id + '\')">' + (open ? '접기' : '📖 펼쳐 보기') + '</button>' +
+      '<button class="btn btn-sm btn-blue" onclick="bookEditReport(\'' + row.id + '\')">✏️ 수정</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="bookDeleteReport(\'' + row.id + '\')">🗑 삭제</button>' +
+      '</div></div>';
+    return html;
+  }).join('');
+}
+
+function renderBooks() {
+  renderBooksFlow();
+  renderBookList();
+}
+
+/* ---------------------------------------------------------------- 동작 */
+function booksReset() {
+  BOOKS.stage = 'search';
+  BOOKS.title = ''; BOOKS.author = ''; BOOKS.note = ''; BOOKS.answerText = '';
+  BOOKS.images = [];
+  BOOKS.book = null; BOOKS.candidates = []; BOOKS.source = ''; BOOKS.foundMsg = '';
+  BOOKS.brief = null; BOOKS.totalSteps = 5; BOOKS.step = 1;
+  BOOKS.question = ''; BOOKS.greeting = ''; BOOKS.qa = []; BOOKS.attempt = 1;
+  BOOKS.feedback = ''; BOOKS.feedbackKind = ''; BOOKS.lastAnswer = '';
+  BOOKS.card = null; BOOKS.rating = 0; BOOKS.editingId = '';
+  BOOKS.editOneLine = ''; BOOKS.editText = '';
+  BOOKS.error = ''; BOOKS.model = ''; BOOKS.loading = false;
+  renderBooks();
+}
+
+async function bookLookup(preset) {
+  if (BOOKS.loading) return;
+  bookCapture();
+  const title = String((preset && preset.title) || BOOKS.title || '').trim();
+  const author = String((preset && preset.author !== undefined ? preset.author : BOOKS.author) || '').trim();
+  if (!title) { BOOKS.error = '책 제목을 먼저 적어 주세요.'; renderBooksFlow(); return; }
+  BOOKS.title = title; BOOKS.author = author;
+  BOOKS.error = ''; BOOKS.foundMsg = '';
+  BOOKS.loading = true; BOOKS.loadingText = '책을 찾고 있어요...';
+  renderBooksFlow();
+  try {
+    const res = await booksApi({ action: 'lookup', title, author });
+    BOOKS.loading = false;
+    if (!res.found) {
+      BOOKS.stage = 'search';
+      BOOKS.book = null;
+      BOOKS.foundMsg = res.message || '검색 결과에서 이 책을 찾지 못했어요. 아래에 사진이나 메모를 남겨 주세요.';
+    } else {
+      BOOKS.book = res.book || null;
+      BOOKS.candidates = res.candidates || [];
+      BOOKS.source = res.source || '';
+      BOOKS.stage = 'confirm';
+    }
+  } catch (e) {
+    BOOKS.loading = false;
+    BOOKS.error = '책을 찾지 못했어요: ' + booksApiError(e);
+  }
+  renderBooksFlow();
+}
+
+function bookPickCandidate(i) {
+  const list = (BOOKS.candidates || []).filter((c) => c.title && (!BOOKS.book || c.title !== BOOKS.book.title));
+  const c = list[i];
+  if (!c) return;
+  bookLookup({ title: c.title, author: '' });
+}
+
+async function bookResizePhoto(file) {
+  return new Promise((resolve) => {
+    const fail = () => resolve('');
+    try {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          const max = 1100;
+          const scale = Math.min(1, max / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * scale));
+          c.height = Math.max(1, Math.round(img.height * scale));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          let data = c.toDataURL('image/jpeg', 0.72);
+          if (data.length > 1200000) {
+            const c2 = document.createElement('canvas');
+            const s2 = Math.min(1, 800 / Math.max(img.width, img.height));
+            c2.width = Math.max(1, Math.round(img.width * s2));
+            c2.height = Math.max(1, Math.round(img.height * s2));
+            c2.getContext('2d').drawImage(img, 0, 0, c2.width, c2.height);
+            data = c2.toDataURL('image/jpeg', 0.6);
+          }
+          URL.revokeObjectURL(url);
+          resolve(data);
+        } catch (err) { fail(); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); fail(); };
+      img.src = url;
+    } catch (e) { fail(); }
+  });
+}
+
+async function bookPickPhotos(input) {
+  const files = Array.from((input && input.files) || []).slice(0, Math.max(0, 3 - BOOKS.images.length));
+  if (input) input.value = '';
+  if (!files.length) return;
+  bookCapture();
+  BOOKS.loading = true; BOOKS.loadingText = '사진을 준비하고 있어요...';
+  renderBooksFlow();
+  for (const f of files) {
+    const data = await bookResizePhoto(f);
+    if (data) BOOKS.images.push(data);
+  }
+  BOOKS.loading = false;
+  renderBooksFlow();
+}
+
+function bookRemovePhoto(i) {
+  bookCapture();
+  BOOKS.images.splice(i, 1);
+  renderBooksFlow();
+}
+
+async function bookStart() {
+  if (BOOKS.loading || !BOOKS.book) return;
+  bookCapture();
+  BOOKS.error = '';
+  BOOKS.loading = true; BOOKS.loadingText = 'AI 코치가 첫 질문을 준비하고 있어요...';
+  renderBooksFlow();
+  try {
+    const res = await booksApi({
+      action: 'start',
+      book: BOOKS.book,
+      note: BOOKS.note,
+      images: BOOKS.images
+    });
+    BOOKS.loading = false;
+    BOOKS.brief = res.brief || null;
+    BOOKS.totalSteps = Number(res.totalSteps) || 5;
+    BOOKS.step = 1;
+    BOOKS.greeting = res.greeting || '';
+    BOOKS.question = res.question || '';
+    BOOKS.qa = [];
+    BOOKS.attempt = 1;
+    BOOKS.feedback = ''; BOOKS.feedbackKind = ''; BOOKS.lastAnswer = '';
+    BOOKS.model = res.model || '';
+    BOOKS.answerText = '';
+    BOOKS.stage = 'qa';
+  } catch (e) {
+    BOOKS.loading = false;
+    BOOKS.error = booksApiError(e);
+  }
+  renderBooks();
+}
+
+async function bookSubmitAnswer() {
+  if (BOOKS.loading) return;
+  bookCapture();
+  const answer = String(BOOKS.answerText || '').trim();
+  if (answer.length < 2) { BOOKS.error = '답을 조금만 더 적어 주세요.'; renderBooksFlow(); return; }
+  BOOKS.error = '';
+  BOOKS.loading = true; BOOKS.loadingText = 'AI 코치가 답을 읽고 있어요...';
+  renderBooksFlow();
+  try {
+    const res = await booksApi({
+      action: 'answer',
+      book: BOOKS.book,
+      brief: BOOKS.brief,
+      qa: BOOKS.qa.map((x) => ({ question: x.question, answer: x.answer })),
+      question: BOOKS.question,
+      answer,
+      step: BOOKS.step,
+      totalSteps: BOOKS.totalSteps,
+      attempt: BOOKS.attempt
+    });
+    BOOKS.loading = false;
+    BOOKS.model = res.model || BOOKS.model;
+    BOOKS.feedback = res.feedback || '';
+    BOOKS.lastAnswer = answer;
+    if (res.status === 'revise') {
+      BOOKS.attempt += 1;
+      BOOKS.feedbackKind = 'revise';
+      BOOKS.answerText = '';
+    } else {
+      BOOKS.qa.push({ question: BOOKS.question, answer });
+      BOOKS.attempt = 1;
+      BOOKS.feedbackKind = 'pass';
+      BOOKS.answerText = '';
+      if (res.status === 'complete' || !res.nextQuestion) {
+        BOOKS.stage = 'card';
+        renderBooks();
+        await bookSummarize(false);
+        return;
+      }
+      BOOKS.question = res.nextQuestion;
+      BOOKS.step += 1;
+    }
+  } catch (e) {
+    BOOKS.loading = false;
+    BOOKS.error = booksApiError(e);
+  }
+  renderBooks();
+}
+
+async function bookSummarize(manual) {
+  if (BOOKS.loading) return;
+  if (!BOOKS.qa.length) { BOOKS.error = '아직 문답이 없어요.'; renderBooksFlow(); return; }
+  BOOKS.error = '';
+  BOOKS.loading = true; BOOKS.loadingText = '문답을 모아 독서록 카드로 정리하고 있어요...';
+  renderBooksFlow();
+  try {
+    const res = await booksApi({
+      action: 'summarize',
+      book: BOOKS.book,
+      brief: BOOKS.brief,
+      qa: BOOKS.qa.map((x) => ({ question: x.question, answer: x.answer })),
+      memberName: bookMemberName()
+    });
+    BOOKS.loading = false;
+    BOOKS.model = res.model || BOOKS.model;
+    BOOKS.card = res.card || null;
+    BOOKS.editOneLine = (BOOKS.card && BOOKS.card.oneLine) || '';
+    BOOKS.editText = (BOOKS.card && BOOKS.card.report) || '';
+    if (!BOOKS.rating && BOOKS.card && BOOKS.card.rating) BOOKS.rating = Number(BOOKS.card.rating) || 0;
+    BOOKS.stage = 'card';
+  } catch (e) {
+    BOOKS.loading = false;
+    BOOKS.error = booksApiError(e) + (manual ? '' : ' 문답은 그대로 저장돼 있으니 다시 정리를 눌러 주세요.');
+    if (!manual) BOOKS.stage = 'card';
+  }
+  renderBooks();
+}
+
+function bookSetRating(n) {
+  BOOKS.rating = Math.max(0, Math.min(5, Number(n) || 0));
+  document.querySelectorAll('#bookStars .book-star').forEach((b) => {
+    b.classList.toggle('on', Number(b.dataset.n) <= BOOKS.rating);
+  });
+}
+
+function bookMemberName() {
+  const m = (state.members || []).find((x) => String(x.name || '').includes('소윤'));
+  return m ? m.name : '소윤';
+}
+
+function bookMemberId() {
+  const m = (state.members || []).find((x) => String(x.name || '').includes('소윤'));
+  return m ? m.id : 'all';
+}
+
+async function bookSave() {
+  if (BOOKS.loading) return;
+  bookCapture();
+  if (!BOOKS.book || !String(BOOKS.editText || '').trim()) {
+    BOOKS.error = '독서록 내용이 비어 있어요. 다시 정리를 눌러 주세요.';
+    renderBooksFlow();
+    return;
+  }
+  const card = BOOKS.card || {};
+  const id = BOOKS.editingId || ('br-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+  const row = {
+    room_id: ROOM_ID,
+    id,
+    member_id: BOOKS.memberId || bookMemberId(),
+    book_title: BOOKS.book.title || '',
+    book_author: BOOKS.book.author || '',
+    book_summary: (BOOKS.brief && BOOKS.brief.gist) || BOOKS.note || '',
+    rating: BOOKS.rating || null,
+    qa_json: {
+      book: BOOKS.book,
+      brief: BOOKS.brief,
+      qa: BOOKS.qa.map((x) => ({ question: x.question, answer: x.answer })),
+      card: {
+        title: BOOKS.book.title || '',
+        oneLine: BOOKS.editOneLine || '',
+        report: BOOKS.editText || '',
+        favorite: card.favorite || '',
+        question: card.question || '',
+        tags: Array.isArray(card.tags) ? card.tags : []
+      },
+      model: BOOKS.model || '',
+      source: BOOKS.source || ''
+    },
+    final_report: BOOKS.editText || '',
+    read_date: todayKey()
+  };
+  BOOKS.loading = true; BOOKS.loadingText = '기록장에 저장하고 있어요...';
+  renderBooksFlow();
+  try {
+    if (!SYNC.client) throw new Error('지금은 서버에 연결되어 있지 않아요. 잠시 뒤 다시 눌러 주세요.');
+    const { error } = await SYNC.client.from('family_book_reports').upsert(row, { onConflict: 'room_id,id' });
+    if (error) throw new Error(error.message);
+    BOOKS.loading = false;
+    BOOKS.editingId = id;
+    BOOKS.stage = 'done';
+    await booksLoad();
+  } catch (e) {
+    BOOKS.loading = false;
+    BOOKS.error = '저장하지 못했어요: ' + booksApiError(e);
+  }
+  renderBooks();
+}
+
+function bookToggleReport(id) {
+  BOOKS.viewId = BOOKS.viewId === id ? '' : id;
+  renderBookList();
+}
+
+function bookEditReport(id) {
+  const row = BOOKS.reports.find((r) => r.id === id);
+  if (!row) return;
+  const q = row.qa_json || {};
+  const card = q.card || {};
+  BOOKS.stage = 'card';
+  BOOKS.editingId = row.id;
+  BOOKS.book = q.book || { title: row.book_title, author: row.book_author, publisher: '' };
+  BOOKS.brief = q.brief || { gist: row.book_summary || '' };
+  BOOKS.qa = Array.isArray(q.qa) ? q.qa : [];
+  BOOKS.card = card;
+  BOOKS.rating = Number(row.rating) || 0;
+  BOOKS.editOneLine = card.oneLine || '';
+  BOOKS.editText = card.report || row.final_report || '';
+  BOOKS.memberId = row.member_id;
+  BOOKS.feedback = ''; BOOKS.feedbackKind = '';
+  BOOKS.totalSteps = BOOKS.qa.length || 5;
+  BOOKS.step = BOOKS.qa.length || 5;
+  BOOKS.model = q.model || '';
+  BOOKS.error = '';
+  renderBooks();
+  const flow = document.getElementById('bookFlowCard');
+  if (flow) flow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function bookDeleteReport(id) {
+  const row = BOOKS.reports.find((r) => r.id === id);
+  if (!row) return;
+  if (!confirm('"' + (row.book_title || '독서록') + '" 독서록을 지울까요? 되돌릴 수 없어요.')) return;
+  try {
+    if (!SYNC.client) throw new Error('서버에 연결되어 있지 않아요.');
+    const { error } = await SYNC.client.from('family_book_reports').delete().eq('room_id', ROOM_ID).eq('id', id);
+    if (error) throw new Error(error.message);
+    BOOKS.reports = BOOKS.reports.filter((r) => r.id !== id);
+    if (BOOKS.editingId === id) booksReset();
+    else renderBookList();
+  } catch (e) {
+    BOOKS.error = '삭제하지 못했어요: ' + booksApiError(e);
+    renderBooksFlow();
+  }
+}
+
+/* ---------------------------------------------------------------- 불러오기 · 실시간 */
+async function booksLoad() {
+  if (!SYNC.client) {
+    try { BOOKS.reports = JSON.parse(localStorage.getItem(BOOK_CACHE_KEY) || '[]'); } catch (e) { BOOKS.reports = []; }
+    renderBookList();
+    return;
+  }
+  try {
+    const { data, error } = await SYNC.client
+      .from('family_book_reports')
+      .select('*')
+      .eq('room_id', ROOM_ID)
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    BOOKS.reports = data || [];
+    try { localStorage.setItem(BOOK_CACHE_KEY, JSON.stringify(BOOKS.reports)); } catch (e) {}
+  } catch (e) {
+    try { BOOKS.reports = JSON.parse(localStorage.getItem(BOOK_CACHE_KEY) || '[]'); } catch (e2) { BOOKS.reports = []; }
+  }
+  renderBookList();
+}
+
+function booksSubscribe() {
+  if (!SYNC.client || BOOKS.channel) return;
+  try {
+    BOOKS.channel = SYNC.client.channel('family-books-' + ROOM_ID)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'family_book_reports', filter: 'room_id=eq.' + ROOM_ID
+      }, () => { booksLoad(); })
+      .subscribe();
+  } catch (e) { console.warn('[books] 실시간 구독 실패', e); }
+}
+
+function booksBoot() {
+  renderBooksFlow();
+  renderBookList();
+  let tries = 0;
+  const timer = setInterval(() => {
+    if (SYNC.client) {
+      clearInterval(timer);
+      booksLoad();
+      booksSubscribe();
+    } else if (++tries > 40) {
+      clearInterval(timer);
+    }
+  }, 500);
+}
+
 function renderAll() {
   dailyAutoReset();
   renderDate();
@@ -4653,6 +5437,7 @@ renderAll();
 loadWeather();
 loadMeals();
 initSync();
+booksBoot();
 ensureLights(false);
 applyTabletMode(TABLET_MODE);
 </script>

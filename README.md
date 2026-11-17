@@ -17,7 +17,8 @@
 6. **💡 집 조명 (Smart Life · Tuya)** — 거실 3구·주방 2구·큰방·소떠기 방♡ ON/OFF, 소비전력 표시, 오프라인 기기 구분, 스위치 이름(별명) 가족 공유, `전체 소등` (맥미니가 꽂힌 스마트플러그 `미니`는 목록·제어·전체 소등에서 제외)
    - **태블릿(820px~) 홈의 `집 조명` 카드**: 거실·큰방·주방·소떠기 방♡ **4개 방 스위치가 2×2로 바로 보입니다**(`#lightQuickGrid`). 탭 이동 없이 그 자리에서 켜고 끌 수 있고, 지프등·차고지 등·스마트 만능 리모컨은 여기서는 빠집니다(`💡 조명` 탭에는 7개 그대로). 제목줄을 누르면 예전처럼 `💡 조명` 탭으로 이동합니다. 폰(≤819px)에서는 이 그리드를 숨기고 기존 한 줄 요약 카드만 보입니다.
 7. **📺 거실 태블릿 모드** — 설정 모달에서 이 기기에만 켜는 옵션. 켜면 30초마다 조명 상태를 자동 새로고침(화면이 보일 때만)하고 화면 꺼짐 방지(Wake Lock)를 유지합니다.
-8. 기존 기능: 오늘의 미션 · 할 일 · 도장판 · 공부 타이머 · 기기 잠금 · 가족 채팅(스티커/15초 음성) · 용돈기입장 · 설정/공유 코드
+8. **📖 AI 독후활동** — 책 제목으로 검색 → 책 소개 확인(사진·메모 보조 입력) → AI 코치 질문 5~6개 → 답 점검(수정 유도) → 독서록 카드 정리·저장 (아래 「AI 독후활동」 절)
+9. 기존 기능: 오늘의 미션 · 할 일 · 도장판 · 공부 타이머 · 기기 잠금 · 가족 채팅(스티커/15초 음성) · 용돈기입장 · 설정/공유 코드
 
 ## 화면 레이아웃 (반응형 · 태블릿 가로)
 
@@ -50,6 +51,7 @@
 - 테이블(항목 단위, 모두 `room_id` 기준):
   - 기본: `family_rooms`, `family_members`, `family_todos`, `family_studies`, `family_study_logs`, `family_stamps`, `family_missions`, `family_chat_messages`, `family_allowance_tx`
   - v2(2026-11-17): `family_events`(일정·D-Day), `family_growth`(키·몸무게·BMI), `family_homeworks`(숙제)
+  - v4(2026-11-17): `family_book_reports`(AI 독후활동 독서록 — `qa_json`에 책 정보·문답·카드, `final_report`에 본문)
   - `family_rooms`에 급식 학교 설정 컬럼: `school_office_code`, `school_code`, `school_name` (기본값 대구 경명여자중학교 = `D10` / `7261037`)
 - 스키마·RLS·Realtime 설정 SQL: `supabase-schema.sql` (여러 번 실행해도 안전 — `add column if not exists` / `create table if not exists`만 사용)
 - 모든 테이블에 RLS를 켜고, 요청 헤더 `x-room-code`와 `room_id`가 일치할 때만 읽기/쓰기를 허용합니다.
@@ -77,6 +79,29 @@
 - 액세스 토큰 만료 60초 전이거나 Tuya가 만료를 알리면 Edge Function이 `GET /v1.0/m/token/{refresh_token}`으로 스스로 갱신해 DB에 다시 저장합니다(사람 손 필요 없음).
 - 스위치 별명은 `family_rooms.light_labels`(키 `기기ID.채널`, 예 `eb3d7596e5372a9a0fytj3.switch_1`)에 들어가고 Realtime으로 가족 전원에게 즉시 반영됩니다.
 - **보호된 기기**: `EXCLUDED_DEVICE_IDS`(현재 맥미니가 꽂힌 스마트플러그 `미니` = `eb1f8a6820f472f854knoa`)는 `list` 응답에서 빠지고, `command`로 제어하면 HTTP 403(`보호된 기기라 제어할 수 없어요.`)으로 거부되며, `all_off`에서도 건너뜁니다. 식구가 실수로 꺼서 맥미니 전원이 나가는 일을 막기 위한 장치입니다.
+
+## 📖 AI 독후활동 (2026-11-17)
+
+소윤이용 독서록 탭. `📖 독후활동` 탭 → 책 제목 검색 → 책 확인 → 질문 5~6개 문답 → 독서록 카드 저장.
+
+### 흐름
+
+1. **책 찾기** — 제목(+지은이 선택). 서버(Edge Function)가 **알라딘 검색·상세 페이지를 실제로 조회**해 제목·지은이·출판사·출간월·분류·ISBN·쪽수·표지·출판사 소개문을 확인한다. 결과가 없으면 교보문고 검색으로 한 번 더 확인하고, 그래도 없으면 `found:false`로 정직하게 돌려준다(클라이언트가 사진·메모 입력을 안내).
+2. **보조 입력(선택)** — 책 뒤표지·목차·본문 사진 최대 3장(브라우저에서 최대 1100px JPEG로 줄여 전송) 또는 2~3줄 메모. 사진이나 메모를 넣으면 질문이 5개 → **6개**로 늘어난다(사진에서 읽은 내용도 근거로 쓴다).
+3. **생각 나누기** — AI 코치가 한 번에 질문 하나. 답을 보내면 서버가 ① 인물·사건 착각, ② 단답/근거 부족을 점검해 `revise`(같은 질문에 다시 답) / `pass`(다음 질문) / `complete`(마지막 통과)로 답한다. 같은 단계에서 두 번째 제출은 막히지 않도록 무조건 통과시킨다.
+   - 검색으로 확인한 책 정보와 **명백히** 어긋날 때만 "틀렸다"고 짚고, 확인되지 않은 세부 내용은 논리·근거를 묻는 방식으로 유도한다.
+4. **독서록 카드** — 통과한 문답을 모아 소윤이 말투를 살린 3~5문단 독서록 + 한 줄 생각 + 인상 깊은 장면 + 남은 질문 + 태그를 만든다. 별점(1~5)과 본문은 화면에서 직접 고칠 수 있고, `💾 기록장에 저장`하면 `family_book_reports`에 들어간다.
+5. **저장된 독서록** — 목록에서 펼쳐 보기 / 수정 / 삭제. `family_book_reports`는 Realtime 게시되어 있어 다른 기기에서 저장해도 목록이 바로 갱신된다.
+
+### 서버 (Supabase Edge Function `book-mentor`)
+
+- 위치: `supabase/functions/book-mentor/index.ts` — `verify_jwt: true`, `x-room-code` 헤더 필수.
+- actions: `lookup`(도서 검색) / `start`(책 요약 + 1번 질문) / `answer`(점검·다음 질문) / `summarize`(독서록 카드).
+- 모델: **`gemini-3.8-flash` 우선 → 실패(429/5xx)하면 `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`** 순서로 자동 폴백. 같은 모델은 혼잡(503)일 때 한 번 더 재시도한다.
+- 무료 티어 실측(AI Studio > 비율 제한, 2026-11-17): `gemini-3.8-flash` 5 RPM / 20 RPD, `gemini-3.5-flash-lite` 15 RPM / 500 RPD, `gemini-3.1-flash-lite` 15 RPM / 500 RPD. 일일 한도(20 RPD)는 세션 2번이면 차므로 실제로는 폴백 모델이 주로 쓰인다(자동 전환, 사용자는 모름).
+- 키: `GEMINI_API_KEY`는 Supabase **Edge Function Secret**에만 있다. `index.html`·깃·로그에는 없다.
+- 안전장치: 방 코드당 시간당 40회(AI)·60회(검색) 호출 제한, 이미지 3장·본문 3000자 등 입력 길이 제한, 응답 `Cache-Control: no-store`.
+- 배포: Supabase Management API의 `POST /v1/projects/<ref>/functions`(body=소스)로 올린다. **같은 슬러그를 `PATCH`로 갱신하면 소스가 바뀌지 않으므로**(버전 그대로) `DELETE` 후 `POST`로 다시 만든다.
 
 ## 초파(에이전트)가 학원 숙제를 DB에 직접 넣는 법
 
