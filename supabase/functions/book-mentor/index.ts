@@ -268,13 +268,13 @@ async function kyoboLookup(title: string): Promise<Candidate[]> {
 }
 
 // ---------------------------------------------------------------- Gemini
-const modelState = { primaryDownDate: '' };
+const modelState = { primaryDownDate: '', primaryBusyUntil: 0 };
 
 type GenResult = { ok: boolean; status: number; data: Record<string, unknown>; raw: string };
 
-async function callGemini(model: string, body: unknown): Promise<GenResult> {
+async function callGemini(model: string, body: unknown, timeoutMs: number): Promise<GenResult> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 60000);
+  const timer = setTimeout(() => ctrl.abort(), Math.max(5000, Math.min(20000, timeoutMs)));
   try {
     const res = await fetch(`${GEMINI_BASE}/${model}:generateContent`, {
       method: 'POST',
@@ -330,32 +330,37 @@ async function askJson(schema: JsonSchema, prompt: string, images: string[], tem
     ],
   };
 
-  const order = modelState.primaryDownDate === todayKst()
-    ? [FALLBACK_MODEL, THIRD_MODEL]
-    : [PRIMARY_MODEL, FALLBACK_MODEL, THIRD_MODEL];
+  const primaryDown = modelState.primaryDownDate === todayKst() || Date.now() < modelState.primaryBusyUntil;
+  const order = primaryDown ? [FALLBACK_MODEL, THIRD_MODEL] : [PRIMARY_MODEL, FALLBACK_MODEL, THIRD_MODEL];
 
   const trace: string[] = [];
-  for (const model of order) {
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      const r = await callGemini(model, body);
-      trace.push(`${model}:${r.status}${attempt > 1 ? '#' + attempt : ''}`);
+  const deadline = Date.now() + 50000; // Edge Function 응답 예산
+  for (let round = 0; round < 2; round++) {
+    for (const model of order) {
+      const left = deadline - Date.now();
+      if (left < 4000) { trace.push('deadline'); break; }
+      const r = await callGemini(model, body, left);
+      trace.push(`${model}:${r.status}`);
       if (r.ok) {
         const txt = firstText(r.data);
-        if (!txt) { trace.push('empty'); break; }
+        if (!txt) { trace.push('empty'); continue; }
         let parsed: unknown = null;
         try { parsed = JSON.parse(txt); } catch (_e) { parsed = null; }
-        if (!parsed) { trace.push('badjson'); break; }
+        if (!parsed) { trace.push('badjson'); continue; }
         return { ok: true as const, model, data: parsed as Record<string, unknown>, trace };
       }
       if (r.status === 429) {
         if (isDailyQuota(r.raw)) modelState.primaryDownDate = todayKst();
-        break; // 한도 초과는 같은 모델 재시도 무의미
+        continue;
       }
-      if (r.status === 500 || r.status === 502 || r.status === 503 || r.status === 504 || r.status === 0) {
-        if (attempt < 2) await new Promise((res) => setTimeout(res, 700 * attempt));
-        continue; // 혼잡/일시 오류: 한 번 더
+      if (model === PRIMARY_MODEL && r.status === 503) {
+        modelState.primaryBusyUntil = Date.now() + 5 * 60 * 1000; // 잠시 3.8은 건너뛴다
       }
-      break; // 그 외 오류는 다음 모델로
+    }
+    if (round === 0 && deadline - Date.now() > 12000) {
+      await new Promise((res) => setTimeout(res, 1200)); // 한 바퀴 더
+    } else {
+      break;
     }
   }
   return { ok: false as const, model: '', data: {}, trace };
@@ -439,6 +444,7 @@ async function actionLookup(body: Record<string, unknown>) {
 
   const { candidates } = await aladinLookup(title, author);
   let list = candidates
+    .filter((c) => !/^\s*\[/.test(c.title) && !/북토크|굿즈|이벤트|세트\]|사은품/.test(c.title))
     .map((c) => ({ c, s: scoreCandidate(c, title, author) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)

@@ -97,7 +97,7 @@
 
 - 위치: `supabase/functions/book-mentor/index.ts` — `verify_jwt: true`, `x-room-code` 헤더 필수.
 - actions: `lookup`(도서 검색) / `start`(책 요약 + 1번 질문) / `answer`(점검·다음 질문) / `summarize`(독서록 카드).
-- 모델: **`gemini-3.8-flash` 우선 → 실패(429/5xx)하면 `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`** 순서로 자동 폴백. 같은 모델은 혼잡(503)일 때 한 번 더 재시도한다.
+- 모델: **`gemini-3.8-flash` 우선 → 실패(429/5xx)하면 `gemini-3.5-flash-lite` → `gemini-3.1-flash-lite`** 순서로 자동 폴백. 응답 전체 예산은 50초이고, 3.8이 혼잡(503)이면 5분 동안 3.8을 건너뛰어 첫 응답을 빠르게 한다.
 - 무료 티어 실측(AI Studio > 비율 제한, 2026-11-17): `gemini-3.8-flash` 5 RPM / 20 RPD, `gemini-3.5-flash-lite` 15 RPM / 500 RPD, `gemini-3.1-flash-lite` 15 RPM / 500 RPD. 일일 한도(20 RPD)는 세션 2번이면 차므로 실제로는 폴백 모델이 주로 쓰인다(자동 전환, 사용자는 모름).
 - 키: `GEMINI_API_KEY`는 Supabase **Edge Function Secret**에만 있다. `index.html`·깃·로그에는 없다.
 - 안전장치: 방 코드당 시간당 40회(AI)·60회(검색) 호출 제한, 이미지 3장·본문 3000자 등 입력 길이 제한, 응답 `Cache-Control: no-store`.
