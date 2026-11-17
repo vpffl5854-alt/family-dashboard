@@ -775,6 +775,7 @@
   .sync-badge.connecting { background: #FFF7E8; border-color: #F6D8AE; color: #B45309; }
   .sync-badge.warn { background: #FFF4E8; border-color: #F3C99B; color: #B45309; }
   .sync-badge.offline { background: #F6F3EC; border-color: #E3DCCB; color: #8A7E6B; }
+  .sync-badge.tablet-mode { background: #F0F4FF; border-color: #C9D6F2; color: #3B568F; }
 
   /* ===== v2: 예보 · 옷차림 ===== */
   .outfit-line {
@@ -1037,6 +1038,7 @@
         <button class="pill-btn" onclick="exportBackup()">↗</button>
       </div>
       <span class="sync-badge connecting" id="syncBadge">🟡 연결 중</span>
+      <span class="sync-badge tablet-mode" id="tabletModeBadge" style="display:none;" title="거실 태블릿 모드: 30초마다 조명 상태를 새로 읽고 화면이 꺼지지 않게 유지해요">📺 태블릿 모드 · 30초 자동 갱신</span>
       <div class="pill-btn" style="font-size:11px; padding:4px 10px;">✨ 오늘도 함께 기록해요</div>
     </div>
   </header>
@@ -1132,6 +1134,7 @@
         <span class="badge badge-gray" id="lightStatusBadge">불러오는 중...</span>
       </div>
       <p class="card-desc" id="lightDesc">Smart Life에 연결된 우리 집 조명을 여기서 바로 켜고 끄고, 스위치 이름도 바꿔요.</p>
+      <div class="date-sub" id="lightTabletNote" style="display:none; font-weight:700; margin:-4px 0 8px;">📺 태블릿 모드 · 30초 자동 갱신</div>
       <div class="btn-row" style="margin-bottom:10px;">
         <button class="btn btn-sm" id="lightRefreshBtn" onclick="loadLights(true)">🔄 새로고침</button>
         <button class="btn btn-sm btn-amber" id="lightAllOffBtn" onclick="confirmAllLightsOff()">🌙 전체 소등</button>
@@ -3138,6 +3141,14 @@ function openSettings() {
           </div>
         `).join('')}
       </div>
+      <div style="border-top:1.5px dashed var(--border); padding-top:10px; margin-top:2px;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:800; cursor:pointer;">
+          <input type="checkbox" id="setTabletMode" ${TABLET_MODE ? 'checked' : ''} onchange="updateTabletHint()" style="width:auto; margin:0;" />
+          📺 거실 태블릿 모드
+        </label>
+        <div class="date-sub" style="margin-top:5px;">거실 공용 태블릿에만 켜세요. 켜 두면 30초마다 조명 상태를 자동 새로고침하고 화면이 꺼지지 않게 유지해요.</div>
+        <div class="date-sub" id="tabletModeHint" style="margin-top:4px; font-weight:700;">${escapeHtml(tabletHintFor(TABLET_MODE))}</div>
+      </div>
       <div class="btn-row" style="margin-top:6px;">
         <button class="btn btn-danger" onclick="resetAllData()">초기화</button>
         <button class="btn btn-green" onclick="saveSettings()">저장하기</button>
@@ -3159,8 +3170,11 @@ function saveSettings() {
     m.avatar = document.getElementById(`setAvatar${i}`).value.trim() || m.avatar;
     m.name = document.getElementById(`setName${i}`).value.trim() || m.name;
   });
+  const tabletField = document.getElementById('setTabletMode');
+  const wantTablet = !!(tabletField && tabletField.checked);
   saveState();
   closeModal();
+  saveTabletMode(wantTablet);
   if (wantedRoom && wantedRoom !== ROOM_ID) {
     if (confirm(`가족 공유 코드를 "${wantedRoom}"(으)로 바꿀까요?\n이 기기는 새 코드의 기록장으로 연결됩니다.`)) {
       localStorage.setItem(ROOM_STORAGE_KEY, wantedRoom);
@@ -4223,8 +4237,141 @@ function renderLights() {
   }).join('');
 }
 
-/* 조명 상태는 화면에 보일 때만 1분 간격으로 조용히 새로 읽는다 */
+/* ==================================================================
+   📺 거실 태블릿 모드 (기기별 설정)
+   - 이 기기의 localStorage에만 저장한다(family_dashboard_tablet_mode).
+     가족 공유 코드가 같아도 폰과 거실 태블릿의 설정은 서로 다를 수 있어야 함.
+   - ON이면 ① 30초마다 조명 상태 자동 갱신(화면이 보일 때만)
+              ② 화면 꺼짐 방지(Wake Lock) 유지
+   ================================================================== */
+const TABLET_MODE_KEY = 'family_dashboard_tablet_mode';
+const TABLET_REFRESH_MS = 30000;
+const WAKE_LOCK = { sentinel: null, requesting: false, error: '' };
+let TABLET_MODE = localStorage.getItem(TABLET_MODE_KEY) === '1';
+let tabletLightTimer = null;
+
+function tabletWakeLockSupported() {
+  return !!(navigator.wakeLock && typeof navigator.wakeLock.request === 'function');
+}
+
+function tabletHintFor(on) {
+  if (!tabletWakeLockSupported()) {
+    return '이 브라우저는 화면 꺼짐 방지를 지원하지 않아요. 기기 설정에서 자동 잠금을 꺼 두면 더 안정적이에요.';
+  }
+  if (!on) return '화면 꺼짐 방지: 꺼짐 — 켜면 화면이 저절로 꺼지지 않아요.';
+  if (WAKE_LOCK.sentinel) return '화면 꺼짐 방지: 지금 켜져 있어요 ✅';
+  if (WAKE_LOCK.error) return '화면 꺼짐 방지가 이 기기에서 막혔어요. 기기 설정에서 자동 잠금을 꺼 두면 더 안정적이에요.';
+  return '저장하면 화면 꺼짐 방지가 자동으로 켜져요.';
+}
+
+function updateTabletHint() {
+  const box = document.getElementById('setTabletMode');
+  const hint = document.getElementById('tabletModeHint');
+  if (hint) hint.textContent = tabletHintFor(box ? !!box.checked : TABLET_MODE);
+}
+
+function updateTabletBadges() {
+  const badge = document.getElementById('tabletModeBadge');
+  if (badge) badge.style.display = TABLET_MODE ? '' : 'none';
+  const note = document.getElementById('lightTabletNote');
+  if (note) note.style.display = TABLET_MODE ? '' : 'none';
+  updateTabletHint();
+}
+
+function requestWakeLock() {
+  if (!TABLET_MODE) return;
+  if (document.visibilityState !== 'visible') return;
+  if (!tabletWakeLockSupported()) return;
+  if (WAKE_LOCK.requesting || WAKE_LOCK.sentinel) return;
+  WAKE_LOCK.requesting = true;
+  let req;
+  try {
+    req = navigator.wakeLock.request('screen');
+  } catch (err) {
+    WAKE_LOCK.requesting = false;
+    WAKE_LOCK.error = String((err && err.message) || err);
+    updateTabletBadges();
+    return;
+  }
+  Promise.resolve(req).then(sentinel => {
+    WAKE_LOCK.requesting = false;
+    WAKE_LOCK.sentinel = sentinel;
+    WAKE_LOCK.error = '';
+    try {
+      sentinel.addEventListener('release', () => {
+        if (WAKE_LOCK.sentinel === sentinel) WAKE_LOCK.sentinel = null;
+        updateTabletBadges();
+        /* 화면이 보이는 상태에서 시스템이 회수하면(예: 잠금 후 복귀) 조용히 한 번 더 시도 */
+        if (TABLET_MODE && document.visibilityState === 'visible') {
+          setTimeout(() => { requestWakeLock(); }, 1500);
+        }
+      });
+    } catch (e) { /* 구형 브라우저: 이벤트 미지원이어도 동작엔 지장 없음 */ }
+    updateTabletBadges();
+  }).catch(err => {
+    /* 미지원·거절은 조용히 무시: 콘솔 에러·팝업 없이 설정 문구만 바꾼다 */
+    WAKE_LOCK.requesting = false;
+    WAKE_LOCK.sentinel = null;
+    WAKE_LOCK.error = String((err && err.message) || err);
+    updateTabletBadges();
+  });
+}
+
+function releaseWakeLock() {
+  const sentinel = WAKE_LOCK.sentinel;
+  WAKE_LOCK.sentinel = null;
+  WAKE_LOCK.error = '';
+  if (!sentinel) return;
+  try {
+    const p = sentinel.release();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch (e) { /* 이미 풀렸으면 무시 */ }
+}
+
+function stopTabletLightTimer() {
+  if (tabletLightTimer) {
+    clearInterval(tabletLightTimer);
+    tabletLightTimer = null;
+  }
+}
+
+function startTabletLightTimer() {
+  stopTabletLightTimer();
+  tabletLightTimer = setInterval(() => {
+    if (!TABLET_MODE) return;
+    if (document.visibilityState !== 'visible') return;   /* 화면 꺼짐·다른 앱: 호출 0 */
+    if (LIGHTS.loading) return;
+    loadLights(false);
+  }, TABLET_REFRESH_MS);
+}
+
+function applyTabletMode(on) {
+  TABLET_MODE = !!on;
+  if (TABLET_MODE) {
+    startTabletLightTimer();
+    if (document.visibilityState === 'visible') {
+      ensureLights(false);   /* 켠 즉시 최신 상태 1회 */
+      requestWakeLock();
+    }
+  } else {
+    stopTabletLightTimer();
+    releaseWakeLock();
+  }
+  updateTabletBadges();
+}
+
+function saveTabletMode(on) {
+  /* 이 기기에만 저장 — Supabase(family_rooms)에는 절대 넣지 않는다 */
+  try {
+    if (on) localStorage.setItem(TABLET_MODE_KEY, '1');
+    else localStorage.removeItem(TABLET_MODE_KEY);
+  } catch (e) { console.warn('[tablet] 설정을 저장하지 못했어요', e); }
+  applyTabletMode(on);
+}
+
+/* 조명 상태는 화면에 보일 때만 1분 간격으로 조용히 새로 읽는다(태블릿 모드는 30초 타이머가 담당) */
 setInterval(() => {
+  if (TABLET_MODE) return;
   if (document.visibilityState !== 'visible') return;
   if (currentTab !== 'lights' && currentTab !== 'all') return;
   if (!LIGHTS.loaded || LIGHTS.error) return;
@@ -4232,7 +4379,13 @@ setInterval(() => {
 }, 60000);
 
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && LIGHTS.loaded) loadLights(false);
+  if (document.visibilityState !== 'visible') return;
+  if (TABLET_MODE) {
+    loadLights(false);      /* 태블릿: 돌아오면 즉시 최신 상태 1회 */
+    requestWakeLock();      /* 화면 꺼짐 방지 재요청 */
+    return;
+  }
+  if (Date.now() - LIGHTS.lastFetch > 20000 && (currentTab === 'all' || currentTab === 'lights')) ensureLights(false);
 });
 
 function renderAll() {
@@ -4258,6 +4411,7 @@ loadWeather();
 loadMeals();
 initSync();
 ensureLights(false);
+applyTabletMode(TABLET_MODE);
 </script>
 </body>
 </html>
