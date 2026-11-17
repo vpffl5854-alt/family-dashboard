@@ -4835,7 +4835,8 @@ function bookStarText(rating) {
 
 /* ---------------------------------------------------------------- 흐름(카드 본문) */
 function renderBooksFlow() {
-  bookCapture();
+  if (BOOKS.skipCapture) BOOKS.skipCapture = false;
+  else bookCapture();
   const flow = document.getElementById('bookFlow');
   const badge = document.getElementById('bookStageBadge');
   if (!flow) return;
@@ -5242,6 +5243,7 @@ async function bookSummarize(manual) {
     BOOKS.editText = (BOOKS.card && BOOKS.card.report) || '';
     if (!BOOKS.rating && BOOKS.card && BOOKS.card.rating) BOOKS.rating = Number(BOOKS.card.rating) || 0;
     BOOKS.stage = 'card';
+    BOOKS.skipCapture = true;   /* 방금 서버에서 받은 값으로 그린다(빈 입력칸이 덮어쓰지 않게) */
   } catch (e) {
     BOOKS.loading = false;
     BOOKS.error = booksApiError(e) + (manual ? '' : ' 문답은 그대로 저장돼 있으니 다시 정리를 눌러 주세요.');
@@ -5351,6 +5353,7 @@ function bookEditReport(id) {
   BOOKS.step = BOOKS.qa.length || 5;
   BOOKS.model = q.model || '';
   BOOKS.error = '';
+  BOOKS.skipCapture = true;     /* 저장된 독서록 값으로 그린다 */
   renderBooks();
   const flow = document.getElementById('bookFlowCard');
   if (flow) flow.scrollIntoView({ behavior: 'smooth', block: 'start' });
