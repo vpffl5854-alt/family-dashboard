@@ -1020,6 +1020,12 @@
   .light-row .light-row-name { flex: 1 1 auto; font-size: 12.5px; font-weight: 800; }
   .light-row input { flex: 1 1 120px; min-width: 0; padding: 7px 9px; border-radius: 11px; border: 1.5px solid var(--border); font-family: inherit; font-size: 12.5px; background: #FFFDF8; }
 
+  /* 홈 조명 카드의 4방 빠른 스위치 — 폰에서는 숨기고 820px 이상에서만 보인다 */
+  #lightQuickGrid { display: none; }
+
+  /* 할 일 카드 목록 — 폰에서는 예전처럼 전부 펼쳐서 보여준다 */
+  .todo-scroll-list { max-height: none; overflow-y: visible; }
+
   /* ==================================================================
      반응형 레이아웃 (2026-11-17)
      - ~819px (폰 세로): 위의 460px 1열 그대로. 아래 규칙은 전부 820px 이상에서만 적용된다.
@@ -1098,6 +1104,73 @@
 
     /* 조명: 넓은 화면에서 한눈에 3~4개씩 */
     .light-grid { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 12px; }
+
+    /* 홈(전체) 탭: 같은 줄 카드끼리 높이를 맞춰 옆 카드 아래가 텅 비어 보이지 않게 */
+    .app > section[data-section="home"] { align-items: stretch; }
+    .app > section[data-section="home"] > .card,
+    .app > section[data-section="home"] > #todoCardsWrap > .card {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 집 조명 카드: 4개 방(거실·큰방·주방·소떠기 방♡) 빠른 스위치 2×2 */
+    #lightQuickGrid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .lq-room {
+      display: flex; flex-direction: column; gap: 5px; min-width: 0;
+      padding: 7px 7px 8px; border-radius: 13px;
+      background: #FFFCF4; border: 1.5px solid #EFE7CF;
+    }
+    .lq-room.on { background: #FFF8EC; border-color: #F7C98B; }
+    .lq-room.offline { background: #FBF8F0; border-style: dashed; }
+    .lq-head { display: flex; align-items: center; gap: 4px; min-width: 0; }
+    .lq-emoji { font-size: 13px; line-height: 1; }
+    .lq-name { font-size: 12px; font-weight: 800; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lq-off { margin-left: auto; font-size: 9px; font-weight: 800; color: #A79A86; white-space: nowrap; }
+    .lq-btns { display: flex; gap: 4px; }
+    .lq-btn {
+      flex: 1 1 0; min-width: 0; padding: 4px 2px; border-radius: 10px;
+      border: 1.5px solid #E6DCC4; background: #FFFDF6; color: var(--muted); font-family: inherit;
+      display: flex; align-items: baseline; justify-content: center; gap: 3px;
+      transition: transform .08s ease, background .15s ease;
+    }
+    .lq-btn:active { transform: scale(0.96); }
+    .lq-btn .lq-btn-name { font-size: 11px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lq-btn .lq-btn-state { font-size: 8.5px; font-weight: 900; letter-spacing: .3px; opacity: .6; }
+    .lq-btn.on {
+      background: linear-gradient(180deg, #FFDCA6 0%, #F8B76C 100%);
+      border-color: #E9A24F; color: #5C3A12;
+    }
+    .lq-btn.on .lq-btn-state { opacity: .8; }
+    .lq-btn[disabled] { opacity: .45; }
+    .lq-btn.saving { opacity: .55; }
+    #lightQuickGrid .lq-empty {
+      grid-column: 1 / -1; text-align: center; padding: 10px 4px;
+      font-size: 11.5px; font-weight: 700; color: var(--muted); line-height: 1.6;
+    }
+
+    /* 할 일 카드: 목록은 3.5~4개 높이에서 자르고 카드 안에서만 스크롤 */
+    .todo-scroll-list {
+      max-height: 196px;
+      overflow-y: auto;
+      padding-right: 4px;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: #D8CBB0 transparent;
+    }
+    .todo-scroll-list::-webkit-scrollbar { width: 6px; }
+    .todo-scroll-list::-webkit-scrollbar-thumb { background: #D8CBB0; border-radius: 999px; }
+    .todo-scroll-list::-webkit-scrollbar-track { background: transparent; }
+    .todo-scroll-list.is-overflowing {
+      -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), rgba(0, 0, 0, .25));
+      mask-image: linear-gradient(to bottom, #000 calc(100% - 14px), rgba(0, 0, 0, .25));
+    }
+    /* 추가 버튼은 스크롤 밖 카드 맨 아래에 고정 */
+    .app > section[data-section="home"] > #todoCardsWrap > .card > .btn-full { margin-top: auto; }
   }
 
   @media (min-width: 1120px) {
@@ -1173,6 +1246,8 @@
         </div>
         <span class="badge" id="lightSummaryBadge">보기</span>
       </div>
+      <!-- 넓은 화면 전용: 거실·큰방·주방·소떠기 방♡ 4개 방 빠른 스위치 (제목줄 클릭과 분리) -->
+      <div id="lightQuickGrid" aria-label="빠른 조명 스위치"></div>
     </div>
 
     <!-- Family Members Summary -->
@@ -1582,6 +1657,7 @@ function switchTab(tab) {
     sec.classList.toggle('hidden', tab !== 'all' && sec.dataset.section !== tab);
   });
   if (tab === 'lights') ensureLights(false);
+  updateTodoScrollHints();
 }
 
 /* Weather */
@@ -1899,7 +1975,7 @@ function renderTodos() {
           ${allDone ? '<span class="badge badge-green">🙌 하이파이브!</span>' : ''}
         </div>
         ${allDone ? '<div class="highfive-banner">🙌 하이파이브! 오늘 할 일을 모두 끝냈어요!</div>' : ''}
-        <div class="item-list">
+        <div class="item-list todo-scroll-list">
           ${list.map(t => `
             <div class="task-item ${t.done ? 'done' : ''}">
               <div class="task-left" onclick="toggleTodo('${m.id}','${t.id}')">
@@ -1917,7 +1993,16 @@ function renderTodos() {
       </div>
     `;
   }).join('');
+  updateTodoScrollHints();
 }
+
+/* 할 일 목록이 잘려 스크롤되는 카드에만 아래쪽 페이드 힌트를 붙인다 */
+function updateTodoScrollHints() {
+  document.querySelectorAll('.todo-scroll-list').forEach(el => {
+    el.classList.toggle('is-overflowing', el.scrollHeight - el.clientHeight > 2);
+  });
+}
+window.addEventListener('resize', () => { updateTodoScrollHints(); renderLightQuickGrid(); });
 
 function toggleTodo(memberId, todoId) {
   const list = state.todos[memberId] || [];
@@ -4224,7 +4309,74 @@ async function runAllLightsOff() {
   }
 }
 
+/* ==================================================================
+   홈 카드의 4방 빠른 스위치 (거실·큰방·주방·소떠기 방♡)
+   - 820px 이상에서만 보인다(#lightQuickGrid, CSS 기본 display:none)
+   - 기기 ID를 먼저 찾고, 없으면 이름으로 찾는다(별명·기기명 변경 대비)
+   - 💡 조명 탭은 기존처럼 7개 기기 전체를 그대로 보여준다
+   ================================================================== */
+const LIGHT_QUICK_TARGETS = [
+  { id: 'eb3d7596e5372a9a0fytj3', match: ['거실'] },
+  { id: '7808227470039f384916', match: ['큰방'] },
+  { id: '1400380470039f38bfc2', match: ['주방'] },
+  { id: '1400380470039f38be2f', match: ['소떠기', '윤이'] }
+];
+
+function pickQuickLights() {
+  const picked = [];
+  const used = new Set();
+  LIGHT_QUICK_TARGETS.forEach(t => {
+    const byId = LIGHTS.devices.find(d => d.id === t.id);
+    const byName = LIGHTS.devices.find(d => t.match.some(k => String(d.name).includes(k)));
+    const dev = byId || byName;
+    if (dev && !used.has(dev.id)) { used.add(dev.id); picked.push(dev); }
+  });
+  return picked;
+}
+
+function renderLightQuickGrid() {
+  const quick = document.getElementById('lightQuickGrid');
+  if (!quick) return;
+
+  if (LIGHTS.connected === false) { quick.innerHTML = ''; return; }
+  if (!LIGHTS.loaded) {
+    quick.innerHTML = '<div class="lq-empty">조명 상태를 확인하고 있어요</div>';
+    return;
+  }
+  if (LIGHTS.error) {
+    quick.innerHTML = '<div class="lq-empty">조명 상태를 못 불러왔어요<br>💡 조명 탭에서 새로고침해 주세요</div>';
+    return;
+  }
+
+  const picks = pickQuickLights();
+  if (!picks.length) {
+    quick.innerHTML = '<div class="lq-empty">집에 등록된 조명 기기를 찾지 못했어요</div>';
+    return;
+  }
+
+  quick.innerHTML = picks.map(d => {
+    const anyOn = d.online && d.switches.some(s => s.on);
+    const roomCls = 'lq-room' + (anyOn ? ' on' : '') + (d.online ? '' : ' offline');
+    const btns = d.switches.map(s => {
+      const saving = LIGHTS_SAVING.has(d.id + '.' + s.code);
+      return `<button class="lq-btn ${s.on ? 'on' : ''} ${saving ? 'saving' : ''}" ${d.online ? '' : 'disabled'} aria-pressed="${s.on ? 'true' : 'false'}" onclick="toggleLight('${d.id}','${s.code}')">
+          <span class="lq-btn-name">${escapeHtml(lightLabel(d, s.code))}</span>
+          <span class="lq-btn-state">${s.on ? 'ON' : 'OFF'}</span>
+        </button>`;
+    }).join('');
+    return `<div class="${roomCls}">
+      <div class="lq-head">
+        <span class="lq-emoji">${lightEmoji(d.name)}</span>
+        <span class="lq-name">${escapeHtml(d.name)}</span>
+        ${d.online ? '' : '<span class="lq-off">오프라인</span>'}
+      </div>
+      <div class="lq-btns">${btns}</div>
+    </div>`;
+  }).join('');
+}
+
 function renderLights() {
+  renderLightQuickGrid();
   const grid = document.getElementById('lightDevices');
   const badge = document.getElementById('lightStatusBadge');
   if (!grid || !badge) return;
